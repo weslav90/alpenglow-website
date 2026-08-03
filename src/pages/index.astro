@@ -7,44 +7,148 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
-					>read the docs
-				</a> or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template
-				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-content">
+          <span class="badge">🧵 Stitched with Mountain Inspiration</span>
+          <h1>Warmth & Art in Every Stitch</h1>
+          <p>
+            Welcome to <strong>Alpenglow Crafting Company</strong>! Inspired by the vibrant pink and golden light that catches alpine peaks at dawn, we create custom embroidery, monogramming, and bespoke sewn pieces built to bring joy to your everyday life.
+          </p>
+          <div class="hero-buttons">
+            <a href="/contact" class="btn btn-primary">Start a Custom Order</a>
+            <a href="/about" class="btn btn-secondary">Our Story</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Grid -->
+      <section class="features">
+        <h2>What We Create</h2>
+        <div class="grid">
+          <div class="card">
+            <div class="icon">✨</div>
+            <h3>Custom Embroidery</h3>
+            <p>Monogrammed gifts, personalized apparel, and detailed fabric art designed to last.</p>
+          </div>
+          <div class="card">
+            <div class="icon">🪡</div>
+            <h3>Bespoke Sewing</h3>
+            <p>Handmade tote bags, home decor, cushions, and custom fabric crafts tailored to your vision.</p>
+          </div>
+          <div class="card">
+            <div class="icon">🏔️</div>
+            <h3>Alpine Inspired</h3>
+            <p>Crafted with the vibrant, welcoming spirit of mountain living and handcrafted quality.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <Footer />
+
+    <style>
+      body {
+        background-color: #FAF8F5;
+        color: #1E293B;
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2em 1em;
+      }
+      .hero {
+        text-align: center;
+        padding: 3em 1em;
+        background: linear-gradient(135deg, #fff5f6 0%, #fff0e5 100%);
+        border-radius: 16px;
+        border: 1px solid #fce3e6;
+        margin-bottom: 3em;
+      }
+      .badge {
+        display: inline-block;
+        background-color: #F4A261;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.35em 1em;
+        border-radius: 20px;
+        margin-bottom: 1em;
+      }
+      .hero h1 {
+        font-size: 2.75rem;
+        color: #1E293B;
+        margin-bottom: 0.5em;
+        line-height: 1.2;
+      }
+      .hero p {
+        font-size: 1.15rem;
+        color: #475569;
+        max-width: 680px;
+        margin: 0 auto 2em auto;
+        line-height: 1.6;
+      }
+      .hero-buttons {
+        display: flex;
+        gap: 1em;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        padding: 0.8em 1.75em;
+        border-radius: 30px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.15s ease;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+      .btn-primary {
+        background-color: #E85D75;
+        color: white;
+      }
+      .btn-secondary {
+        background-color: #ffffff;
+        color: #1E293B;
+        border: 1px solid #cbd5e1;
+      }
+      .features h2 {
+        text-align: center;
+        color: #1E293B;
+        margin-bottom: 1.5em;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5em;
+      }
+      .card {
+        background: white;
+        padding: 2em;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      }
+      .card .icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5em;
+      }
+      .card h3 {
+        color: #E85D75;
+        margin-bottom: 0.5em;
+      }
+      .card p {
+        color: #64748B;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    </style>
+  </body>
 </html>
