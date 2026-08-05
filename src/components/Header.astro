@@ -1,73 +1,76 @@
 ---
 import HeaderLink from './HeaderLink.astro';
+import StitchDivider from './StitchDivider.astro';
 import { SITE_TITLE } from '../consts';
 ---
 
 <header>
   <nav>
-    <h2><a href="/">{SITE_TITLE}</a></h2>
+    <a href="/" class="logotype">{SITE_TITLE.replace(' Crafting Company', '')}</a>
     <div class="internal-links">
       <HeaderLink href="/">Home</HeaderLink>
-      <HeaderLink href="/about">About Us</HeaderLink>
-      <HeaderLink href="/blog">Gallery & Posts</HeaderLink>
-      <HeaderLink href="/contact" class="order-link">Request an Order</HeaderLink>
+      <HeaderLink href="/about">Our Story</HeaderLink>
+      <HeaderLink href="/shop">Shop</HeaderLink>
+      <HeaderLink href="/contact" class="order-link">Custom Order</HeaderLink>
     </div>
   </nav>
+  <StitchDivider />
 </header>
 
 <style>
   header {
-    margin: 0;
-    padding: 0 1em;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border-bottom: 2px solid #F4A261;
-  }
-  h2 {
-    margin: 0;
-    font-size: 1.25em;
-  }
-  h2 a,
-  h2 a.active {
-    text-decoration: none;
-    color: #E85D75;
-    font-weight: 700;
+    background: var(--cream);
+    padding-top: 0.5em;
   }
   nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1000px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 1em 0;
+    padding: 0.75em 1.5em 1em 1.5em;
+    flex-wrap: wrap;
+    gap: 0.75em;
+  }
+  .logotype {
+    font-family: "Pinyon Script", cursive;
+    font-size: 2.35rem;
+    color: var(--rose);
+    text-decoration: none;
+    line-height: 1;
   }
   .internal-links {
     display: flex;
-    gap: 1em;
+    gap: 0.5em;
     align-items: center;
+    flex-wrap: wrap;
   }
-  a {
-    padding: 0.5em 0.75em;
-    color: #1E293B;
-    border-bottom: 4px solid transparent;
+  .internal-links :global(a) {
+    padding: 0.5em 0.85em;
+    color: var(--ink);
     text-decoration: none;
-    font-weight: 500;
+    font-family: "Manrope", sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 999px;
   }
-  a.active {
+  .internal-links :global(a.active) {
+    color: var(--rose);
     text-decoration: none;
-    border-bottom-color: #E85D75;
-    color: #E85D75;
+    background: rgba(255, 45, 111, 0.08);
   }
-  .order-link {
-    background-color: #E85D75;
+  .internal-links :global(a.order-link) {
+    background: var(--rose);
     color: white !important;
-    border-radius: 20px;
-    padding: 0.5em 1.2em;
-    border-bottom: none !important;
-    transition: transform 0.15s ease, background-color 0.15s ease;
+    font-weight: 700;
   }
-  .order-link:hover {
-    background-color: #d04b62;
-    transform: translateY(-1px);
+  .internal-links :global(a.order-link:hover) {
+    background: var(--violet);
+  }
+  @media (max-width: 640px) {
+    nav {
+      justify-content: center;
+      text-align: center;
+    }
   }
 </style>
