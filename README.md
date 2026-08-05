@@ -1,44 +1,22 @@
-# Astro Starter Kit: Blog
+# Alpenglow Crafting Company
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/astro-blog-starter-template)
-
-![Astro Template Preview](https://github.com/withastro/astro/assets/2244813/ff10799f-a816-4703-b967-c78997e8323d)
-
-<!-- dash-content-start -->
-
-Create a blog with Astro and deploy it on Cloudflare Workers as a [static website](https://developers.cloudflare.com/workers/static-assets/).
-
-Features:
-
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
-- ✅ Built-in Observability logging
-
-<!-- dash-content-end -->
-
-## Getting Started
-
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
-
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/astro-blog-starter-template
-```
-
-A live public deployment of this template is available at [https://astro-blog-starter-template.templates.workers.dev](https://astro-blog-starter-template.templates.workers.dev)
+The website for **Alpenglow Crafting Company** — custom embroidery, artisan sewing, and
+handcrafted goods, built with [Astro](https://astro.build) and deployed on
+[Cloudflare Workers](https://developers.cloudflare.com/workers/static-assets/).
 
 ## 🚀 Project Structure
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+- `src/pages/` — site routes: `index.astro` (home), `shop.astro` (ready-made products),
+  `about.astro` (our story), `contact.astro` (custom order form), plus the blog under `blog/`.
+- `src/components/` — shared Astro components (header, footer, stitch divider, etc.).
+- `src/content/blog/` — Markdown/MDX blog posts, retrieved via `getCollection()`. See
+  [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/).
+- `src/data/products.ts` — ready-made products shown on the Shop page, each linked to a
+  Stripe Payment Link.
+- `src/pages/create-checkout-session.ts` — Stripe checkout endpoint.
+- `public/` — static assets (images, fonts, favicon).
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
-
-Any static assets, like images, can be placed in the `public/` directory.
+The contact/custom-order form submits via [Web3Forms](https://web3forms.com).
 
 ## 🧞 Commands
 
@@ -57,8 +35,10 @@ All commands are run from the root of the project, from a terminal:
 
 ## 👀 Want to learn more?
 
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Check out [Astro's documentation](https://docs.astro.build) or the
+[Cloudflare Workers docs](https://developers.cloudflare.com/workers/) for the deployment platform.
 
 ## Credit
 
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+This site started from the [Astro + Cloudflare blog starter template](https://github.com/cloudflare/templates/tree/main/astro-blog-starter-template),
+which itself is based on the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
