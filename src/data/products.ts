@@ -17,7 +17,7 @@ export const products: Product[] = [
 		price: "$35",
 		description:
 			"A classic cotton cap with your choice of monogram or design, stitched to order.",
-		image: "/blog-placeholder-1.jpg",
+		image: "/embroidered-cap.jpg",
 		paymentLink: "https://buy.stripe.com/bJebJ3ecv6TD50ZfQW1B601", 
 	},
 ];
