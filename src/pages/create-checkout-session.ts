@@ -25,7 +25,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
 
   const session = await stripeRes.json();
-  return new Response(JSON.stringify({ url: session.url }), {
+  return new Response(JSON.stringify(session), {
     headers: { "Content-Type": "application/json" },
   });
 };
