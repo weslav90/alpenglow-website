@@ -1,29 +1,104 @@
 ---
-import Layout from '../layouts/BlogPost.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import StitchDivider from '../components/StitchDivider.astro';
+import { SITE_TITLE } from '../consts';
 ---
 
-<Layout
-  title="About Alpenglow Crafting Co."
-  description="The story behind Alpenglow Crafting Company."
-  pubDate={new Date('August 02 2026')}
->
-  <p>
-    If you've ever stood at the base of a mountain just as the sun drops below the horizon, you've seen it: that brief, magical moment when the snow-capped peaks illuminate in shades of rosy pink, warm gold, and vibrant violet. 
-  </p>
-  <p>
-    That phenomenon is called <strong>Alpenglow</strong>.
-  </p>
-  <p>
-    We founded <strong>Alpenglow Crafting Company</strong> around that exact feeling—bringing warmth, vibrant color, and handcrafted beauty into everyday items. Whether it’s a custom embroidered monogram, a handmade tote bag, or a specialized fabric project, every piece is stitched with care, precision, and passion.
-  </p>
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`Our Story | ${SITE_TITLE}`}
+      description="The story behind Alpenglow Crafting Company and the hands behind every stitch."
+    />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <section class="section intro">
+        <span class="eyebrow">Our Story</span>
+        <h1>Named for a moment you have to stop and watch.</h1>
+        <p class="lede">
+          If you've ever stood at the base of a mountain just as the sun drops below the horizon,
+          you've seen it: that brief, magical moment when the peaks light up in shades of rose,
+          gold, and violet. That phenomenon is called <strong>alpenglow</strong> — and it's where
+          our name, and the colors you see across this site, come from.
+        </p>
+      </section>
 
-  <h3>Our Craft & Equipment</h3>
-  <p>
-    Equipped with professional sewing and embroidery tools, we work closely with clients to transform custom ideas into tangible, beautiful keepsakes. From personal gifts to custom branded goods, we take pride in clean stitchwork and durable materials.
-  </p>
+      <StitchDivider />
 
-  <h3>Have a Custom Idea?</h3>
-  <p>
-    We love collaborate on unique projects! Head over to our <a href="/contact">Order Request page</a> to share your ideas, dimensions, or fabric preferences, and let's create something beautiful together.
-  </p>
-</Layout>
+      <section class="section maker">
+        <span class="eyebrow">Meet the Maker</span>
+        <h2>[Wife's name]'s story</h2>
+        <p class="placeholder-note">
+          ✏️ This section is a starting point — swap in your wife's actual story here: how she
+          learned embroidery, what drew her to it, and what she loves about making custom pieces
+          for people. A sentence or two on her background makes this page feel personal rather
+          than generic.
+        </p>
+        <p>
+          Every piece that leaves our workshop is stitched by hand by [Wife's name], on a
+          brand-new embroidery machine she uses to bring each customer's idea to life — from a
+          simple monogram to a fully custom design.
+        </p>
+      </section>
+
+      <StitchDivider />
+
+      <section class="section craft">
+        <h2>Our craft &amp; equipment</h2>
+        <p>
+          Equipped with professional sewing and embroidery tools, we work closely with clients to
+          transform custom ideas into tangible, beautiful keepsakes. From personal gifts to custom
+          branded goods for organizations like our kids' school, we take pride in clean stitchwork
+          and durable materials.
+        </p>
+      </section>
+
+      <StitchDivider />
+
+      <section class="section cta">
+        <h2>Have a custom idea?</h2>
+        <p>
+          We love collaborating on unique projects! Head over to our
+          <a href="/contact">custom order page</a> to share your ideas, dimensions, or fabric
+          preferences, and let's create something beautiful together.
+        </p>
+        <a href="/contact" class="btn btn-primary">Start a Custom Order</a>
+      </section>
+    </main>
+    <Footer />
+
+    <style>
+      .intro,
+      .cta {
+        text-align: center;
+      }
+      .intro .lede {
+        max-width: 640px;
+        margin: 0 auto;
+        font-size: 1.15rem;
+        color: var(--peak);
+      }
+      .maker,
+      .craft {
+        max-width: 720px;
+      }
+      .placeholder-note {
+        background: rgba(255, 182, 39, 0.12);
+        border: 1px dashed var(--gold);
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        font-size: 0.9rem;
+        color: var(--ink);
+      }
+      .cta p {
+        max-width: 560px;
+        margin: 0 auto 1.5rem auto;
+      }
+    </style>
+  </body>
+</html>

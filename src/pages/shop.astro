@@ -1,0 +1,114 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import StitchDivider from '../components/StitchDivider.astro';
+import { SITE_TITLE } from '../consts';
+import { products } from '../data/products';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`Shop | ${SITE_TITLE}`}
+      description="Ready-made embroidered goods you can order today, no custom quote needed."
+    />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <section class="section intro">
+        <span class="eyebrow">Ready-Made</span>
+        <h1>Shop our ready-to-order pieces</h1>
+        <p class="lede">
+          Looking for something custom instead? Head to our
+          <a href="/contact">custom order page</a> to get a quote.
+        </p>
+      </section>
+
+      <StitchDivider />
+
+      <section class="section">
+        <div class="grid">
+          {products.map((product) => (
+            <div class="product">
+              <img src={product.image} alt={product.name} />
+              <div class="product-body">
+                <h3>{product.name}</h3>
+                <p class="description">{product.description}</p>
+                <div class="product-footer">
+                  <span class="price">{product.price}</span>
+                  <a href={product.paymentLink} class="btn btn-primary buy-btn">Buy Now</a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
+    <Footer />
+
+    <style>
+      .intro {
+        text-align: center;
+      }
+      .intro .lede {
+        color: var(--peak);
+        max-width: 560px;
+        margin: 0 auto;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+      }
+      .product {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-card);
+        display: flex;
+        flex-direction: column;
+      }
+      .product img {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        border-radius: 0;
+        display: block;
+      }
+      .product-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+      }
+      .product-body h3 {
+        margin-bottom: 0.4em;
+      }
+      .description {
+        color: var(--peak);
+        font-size: 0.95rem;
+        flex-grow: 1;
+      }
+      .product-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+      }
+      .price {
+        font-family: "Fraunces", serif;
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: var(--rose);
+      }
+      .buy-btn {
+        padding: 0.6em 1.4em;
+        font-size: 0.9rem;
+      }
+    </style>
+  </body>
+</html>
