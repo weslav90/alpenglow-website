@@ -1,0 +1,39 @@
+---
+// The site's signature motif: a dashed gradient line that reads as both
+// a light-band on a mountain ridge and a literal line of embroidery
+// stitching. Used between sections instead of a plain <hr>.
+interface Props {
+	compact?: boolean;
+}
+const { compact = false } = Astro.props;
+---
+
+<div class="stitch-divider" class:list={{ compact }} aria-hidden="true">
+	<svg viewBox="0 0 400 14" preserveAspectRatio="none">
+		<defs>
+			<linearGradient id="stitchGradient" x1="0" y1="0" x2="1" y2="0">
+				<stop offset="0%" stop-color="#ff2d6f"></stop>
+				<stop offset="35%" stop-color="#ff6f3c"></stop>
+				<stop offset="65%" stop-color="#ffb627"></stop>
+				<stop offset="100%" stop-color="#6c3fc2"></stop>
+			</linearGradient>
+		</defs>
+		<line
+			x1="0"
+			y1="7"
+			x2="400"
+			y2="7"
+			stroke="url(#stitchGradient)"
+			stroke-width="3"
+			stroke-dasharray="14 10"
+			stroke-linecap="round"></line>
+	</svg>
+</div>
+
+<style>
+	.stitch-divider.compact {
+		max-width: 240px;
+		padding: 0;
+		margin: 0.5rem 0 0 0;
+	}
+</style>
