@@ -20,20 +20,4 @@ export const products: Product[] = [
 		image: "/blog-placeholder-1.jpg",
 		paymentLink: "https://buy.stripe.com/bJebJ3ecv6TD50ZfQW1B601", 
 	},
-	{
-		name: "Monogrammed Tote Bag",
-		price: "$34",
-		description:
-			"Durable canvas tote with a hand-finished monogram — perfect for school, gifts, or everyday carry.",
-		image: "/blog-placeholder-2.jpg",
-		paymentLink: "#", // TODO: replace with your Stripe Payment Link
-	},
-	{
-		name: "Custom Patch",
-		price: "$14",
-		description:
-			"A small embroidered patch for backpacks, jackets, or team gear.",
-		image: "/blog-placeholder-3.jpg",
-		paymentLink: "#", // TODO: replace with your Stripe Payment Link
-	},
 ];
