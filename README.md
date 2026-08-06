@@ -7,13 +7,10 @@ handcrafted goods, built with [Astro](https://astro.build) and deployed on
 ## 🚀 Project Structure
 
 - `src/pages/` — site routes: `index.astro` (home), `shop.astro` (ready-made products),
-  `about.astro` (our story), `contact.astro` (custom order form), plus the blog under `blog/`.
+  `about.astro` (our story), `contact.astro` (custom order form).
 - `src/components/` — shared Astro components (header, footer, stitch divider, etc.).
-- `src/content/blog/` — Markdown/MDX blog posts, retrieved via `getCollection()`. See
-  [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/).
 - `src/data/products.ts` — ready-made products shown on the Shop page, each linked to a
   Stripe Payment Link.
-- `src/pages/create-checkout-session.ts` — Stripe checkout endpoint.
 - `public/` — static assets (images, fonts, favicon).
 
 The contact/custom-order form submits via [Web3Forms](https://web3forms.com).
