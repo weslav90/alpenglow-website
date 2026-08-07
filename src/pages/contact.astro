@@ -51,6 +51,8 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
           <form id="contact-form">
             <input type="hidden" name="access_key" value={web3formsKey} />
             <input type="hidden" name="subject" value="New Craft Order Request - Alpenglow Crafts" />
+            <input type="hidden" name="order_type" value="Custom Order" />
+            <input type="hidden" name="next_step" value="Waiting Invoice Response" />
             <input type="checkbox" name="botcheck" id="botcheck" style="display: none;" />
 
             <div class="form-group">
@@ -76,8 +78,8 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
             <div class="form-group">
               <p class="options-intro">
                 Already know what you want? Pick a font and thread color — browse the
-                <a href="/#fonts">full font guide</a> if you'd like to see them first. Not sure yet?
-                Skip this and just describe it below.
+                <a href="/#fonts">font guide</a> and <a href="/#threads">thread colors</a> if you'd
+                like to see them first. Not sure yet? Skip this and just describe it below.
               </p>
               <FontThreadFields idPrefix="contact" namePrefix="contact" required={false} />
             </div>

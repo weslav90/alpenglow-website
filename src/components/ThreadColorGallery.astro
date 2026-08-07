@@ -1,0 +1,92 @@
+---
+// "Browse Our Thread Colors" gallery — shows every thread color we stock with
+// the code and name customers select when ordering, so the dropdown options on
+// the Shop and custom order forms mean something before they pick one.
+import { THREAD_COLORS } from "../data/threadColors";
+---
+
+<section id="threads" class="section threads-section">
+	<span class="eyebrow">Personalize Your Order</span>
+	<h2>Browse our thread colors</h2>
+	<p class="section-sub">
+		Every color we stitch with, and the name you'll pick from when you place an order.
+	</p>
+
+	<ul class="thread-grid">
+		{
+			THREAD_COLORS.map((color) => (
+				<li class="thread-item">
+					<span class="thread-swatch" style={`background: ${color.hex}`} aria-hidden="true" />
+					<span class="thread-label">
+						<span class="thread-name">{color.name}</span>
+						<span class="thread-code">{color.code}</span>
+					</span>
+				</li>
+			))
+		}
+	</ul>
+
+	<p class="thread-caveat">
+		Screens vary — these swatches are close, but the thread in hand is the real thing. Ask us
+		if you'd like us to double-check a color before we start.
+	</p>
+</section>
+
+<style>
+	.threads-section {
+		text-align: center;
+	}
+	.threads-section .section-sub {
+		max-width: 620px;
+		margin: -0.5rem auto 0 auto;
+	}
+	.thread-grid {
+		list-style: none;
+		margin: 2.5rem auto 0 auto;
+		padding: 0;
+		max-width: 900px;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+		gap: 1rem;
+	}
+	.thread-item {
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+		padding: 0.55rem 0.7rem;
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-radius: 12px;
+		text-align: left;
+	}
+	.thread-swatch {
+		flex-shrink: 0;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 8px;
+		/* Keeps White / Snow White from vanishing against the card. */
+		border: 1px solid rgba(0, 0, 0, 0.16);
+	}
+	.thread-label {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+	.thread-name {
+		font-family: "Manrope", sans-serif;
+		font-weight: 700;
+		font-size: 0.85rem;
+		color: var(--ink);
+		line-height: 1.25;
+	}
+	.thread-code {
+		font-size: 0.75rem;
+		color: var(--peak);
+	}
+	.thread-caveat {
+		max-width: 620px;
+		margin: 2rem auto 0 auto;
+		font-size: 0.85rem;
+		color: var(--peak);
+	}
+</style>
