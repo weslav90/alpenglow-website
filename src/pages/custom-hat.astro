@@ -1,0 +1,187 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import StitchDivider from '../components/StitchDivider.astro';
+import FontThreadFields from '../components/FontThreadFields.astro';
+import { SITE_TITLE } from '../consts';
+
+const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf-9714-a9957d73f0a4";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`Design Your Cap | ${SITE_TITLE}`}
+      description="Design a custom embroidered baseball cap — choose your font, thread color, and the text you'd like stitched."
+    />
+  </head>
+  <body>
+    <Header />
+    <main class="hat-container">
+      <div class="hat-header">
+        <span class="eyebrow">Custom Cap</span>
+        <h1>Design your cap</h1>
+        <p>
+          Tell us what you'd like stitched and we'll send you a quote — usually within 24–48 hours.
+          Nothing is charged until you approve it.
+        </p>
+      </div>
+
+      <StitchDivider compact />
+
+      <div class="hat-wrapper">
+        <aside class="hat-preview">
+          <img src="/blank-cap.jpg" alt="Blank white baseball cap with a blue brim, ready to be embroidered" />
+          <h3>How it works</h3>
+          <ol class="steps">
+            <li>Pick your font, thread color, and the text you want stitched.</li>
+            <li>We email you a quote for your cap.</li>
+            <li>Approve it and we'll invoice you, then start stitching.</li>
+          </ol>
+          <div class="preview-note">
+            <p>
+              Not sure what to pick? Browse the <a href="/#fonts">font guide</a> and
+              <a href="/#threads">thread colors</a> first.
+            </p>
+          </div>
+        </aside>
+
+        <div class="form-card">
+          <form id="custom-hat-form">
+            <input type="hidden" name="access_key" value={web3formsKey} />
+            <input type="hidden" name="subject" value="New Custom Hat Order - Alpenglow Crafts" />
+            <input type="hidden" name="order_type" value="Custom Hat" />
+            <input type="hidden" name="next_step" value="Waiting Invoice Response" />
+            <input type="checkbox" name="botcheck" id="hat-botcheck" style="display: none;" />
+
+            <div class="form-group">
+              <label for="hat-name">Your Name <span class="required">*</span></label>
+              <input type="text" id="hat-name" name="name" required placeholder="Jane Doe" />
+            </div>
+
+            <div class="form-group">
+              <label for="hat-email">Email Address <span class="required">*</span></label>
+              <input type="email" id="hat-email" name="email" required placeholder="jane@example.com" />
+            </div>
+
+            <div class="form-group">
+              <label for="hat-quantity">How many caps? <span class="required">*</span></label>
+              <input type="number" id="hat-quantity" name="quantity" min="1" value="1" required />
+            </div>
+
+            <div class="form-group">
+              <label for="hat-text">Text to Embroider <span class="required">*</span></label>
+              <input
+                type="text"
+                id="hat-text"
+                name="embroidery_text"
+                required
+                maxlength="60"
+                placeholder="e.g. Wildcats, or the initials NLM"
+              />
+              <p class="field-hint">
+                Exactly as you'd like it stitched, including capitalization. Some fonts are
+                uppercase-only or lowercase-only — we'll confirm with you if yours is.
+              </p>
+            </div>
+
+            <div class="form-group">
+              <FontThreadFields idPrefix="hat" namePrefix="hat" />
+            </div>
+
+            <div class="form-group">
+              <label for="hat-instructions">Anything else we should know?</label>
+              <textarea
+                id="hat-instructions"
+                name="instructions"
+                rows="5"
+                placeholder="Placement, cap color preference, a date you need it by, or anything else that would help us get it right..."
+              ></textarea>
+            </div>
+
+            <button type="submit" id="hat-submit-btn" class="btn btn-primary submit-btn">
+              Request My Quote
+            </button>
+            <div id="hat-result" class="result-message"></div>
+          </form>
+        </div>
+      </div>
+    </main>
+    <Footer />
+
+    <script>
+      const form = document.getElementById('custom-hat-form') as HTMLFormElement;
+      const result = document.getElementById('hat-result') as HTMLElement;
+      const submitBtn = document.getElementById('hat-submit-btn') as HTMLButtonElement;
+
+      if (form && result && submitBtn) {
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          submitBtn.disabled = true;
+          submitBtn.innerText = "Sending...";
+          result.style.display = "block";
+          result.className = "result-message pending";
+          result.innerText = "Submitting your request...";
+
+          const formData = new FormData(form);
+          const json = JSON.stringify(Object.fromEntries(formData));
+
+          try {
+            const response = await fetch('https://api.web3forms.com/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: json
+            });
+            const jsonResponse = await response.json();
+
+            if (response.status === 200) {
+              result.className = "result-message success";
+              result.innerText = "Thank you! We'll email you a quote for your cap shortly.";
+              form.reset();
+            } else {
+              result.className = "result-message error";
+              result.innerText = jsonResponse.message || "Something went wrong. Please try again.";
+            }
+          } catch (error) {
+            result.className = "result-message error";
+            result.innerText = "Network error. Please try again.";
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Request My Quote";
+          }
+        });
+      }
+    </script>
+
+    <style>
+      .hat-container { max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem; }
+      .hat-header { text-align: center; margin-bottom: 1.5rem; }
+      .hat-header h1 { color: var(--ink); }
+      .hat-header p { max-width: 560px; margin: 0 auto; color: var(--peak); }
+      .hat-wrapper { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-top: 2.5rem; align-items: start; }
+      @media (max-width: 768px) { .hat-wrapper { grid-template-columns: 1fr; } }
+      .hat-preview { background: var(--card); padding: 1.75rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-card); }
+      .hat-preview img { width: 100%; border-radius: 12px; display: block; margin-bottom: 1.25rem; }
+      .hat-preview h3 { color: var(--rose); margin-top: 0; margin-bottom: 0.75rem; font-size: 1.05rem; }
+      .steps { margin: 0; padding-left: 1.1rem; color: var(--peak); font-size: 0.9rem; }
+      .steps li { margin-bottom: 0.5rem; }
+      .preview-note { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--peak); }
+      .preview-note p { margin: 0; }
+      .preview-note a { color: var(--rose); font-weight: 600; text-decoration: none; }
+      .form-card { background: var(--card); padding: 2rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-card); }
+      .form-group { margin-bottom: 1.25rem; }
+      .form-group label { display: block; font-size: 0.875rem; font-weight: 700; margin-bottom: 0.375rem; font-family: "Manrope", sans-serif; }
+      .required { color: var(--rose); }
+      .form-group input, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+      .form-group input:focus, .form-group textarea:focus { outline: 2px solid var(--violet); outline-offset: 1px; }
+      .field-hint { margin: 0.4rem 0 0 0; font-size: 0.8rem; color: var(--peak); }
+      .submit-btn { width: 100%; text-align: center; border: none; font-size: 1rem; }
+      .result-message { display: none; margin-top: 1rem; padding: 0.875rem; border-radius: 8px; font-size: 0.875rem; text-align: center; }
+      .result-message.pending { background-color: #fdf0e8; color: var(--coral); }
+      .result-message.success { background-color: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
+      .result-message.error { background-color: #fff5f5; color: #9b2c2c; border: 1px solid #fed7d7; }
+    </style>
+  </body>
+</html>

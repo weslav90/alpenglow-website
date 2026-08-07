@@ -3,7 +3,6 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StitchDivider from '../components/StitchDivider.astro';
-import FontThreadFields from '../components/FontThreadFields.astro';
 import { SITE_TITLE } from '../consts';
 import { products } from '../data/products';
 ---
@@ -13,18 +12,19 @@ import { products } from '../data/products';
   <head>
     <BaseHead
       title={`Shop | ${SITE_TITLE}`}
-      description="Ready-made embroidered goods you can order today, no custom quote needed."
+      description="Ready-made embroidered goods you can order today, plus made-to-order pieces stitched with your own text."
     />
   </head>
   <body>
     <Header />
     <main>
       <section class="section intro">
-        <span class="eyebrow">Ready-Made</span>
-        <h1>Shop our ready-to-order pieces</h1>
+        <span class="eyebrow">Shop</span>
+        <h1>Ready to order</h1>
         <p class="lede">
-          Looking for something custom instead? Head to our
-          <a href="/contact">custom order page</a> to get a quote.
+          Buy a finished piece as pictured, or design your own with the font and thread color of
+          your choice. Looking for something else entirely? Start a
+          <a href="/contact">custom order</a>.
         </p>
       </section>
 
@@ -32,41 +32,27 @@ import { products } from '../data/products';
 
       <section class="section">
         <div class="grid">
-          {products.map((product, i) => (
+          {products.map((product) => (
             <div class="product">
               <img src={product.image} alt={product.name} />
               <div class="product-body">
                 <h3>{product.name}</h3>
                 <p class="description">{product.description}</p>
-
-                {product.customizable && (
-                  <div class="product-options">
-                    <FontThreadFields idPrefix={`product-${i}`} />
-                  </div>
+                {product.customOrderHref && (
+                  <p class="quote-note">Quoted before you pay — no charge until you approve.</p>
                 )}
-
                 <div class="product-footer">
                   <span class="price">{product.price}</span>
-                  {product.customizable ? (
-                    <a
-                      href="#"
-                      class="btn btn-primary buy-btn is-disabled"
-                      aria-disabled="true"
-                      data-buy-link
-                      data-base-href={product.paymentLink}
-                      data-product-options={`product-${i}`}
-                    >
-                      Buy Now
+                  {product.paymentLink ? (
+                    <a href={product.paymentLink} class="btn btn-primary buy-btn">
+                      {product.ctaLabel ?? 'Buy Now'}
                     </a>
                   ) : (
-                    <a href={product.paymentLink} class="btn btn-primary buy-btn">Buy Now</a>
+                    <a href={product.customOrderHref} class="btn btn-primary buy-btn">
+                      {product.ctaLabel ?? 'Design Yours'}
+                    </a>
                   )}
                 </div>
-                {product.customizable && (
-                  <p class="options-hint" data-options-hint={`product-${i}`}>
-                    Choose a font and thread color to continue.
-                  </p>
-                )}
               </div>
             </div>
           ))}
@@ -81,7 +67,7 @@ import { products } from '../data/products';
       }
       .intro .lede {
         color: var(--peak);
-        max-width: 560px;
+        max-width: 600px;
         margin: 0 auto;
       }
       .grid {
@@ -123,6 +109,7 @@ import { products } from '../data/products';
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 1rem;
         margin-top: 1rem;
       }
       .price {
@@ -134,78 +121,13 @@ import { products } from '../data/products';
       .buy-btn {
         padding: 0.6em 1.4em;
         font-size: 0.9rem;
+        white-space: nowrap;
       }
-      .buy-btn.is-disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        pointer-events: none;
-      }
-      .product-options {
-        margin: 1.25rem 0;
-        padding: 1.25rem;
-        background: var(--cream);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-      }
-      .options-hint {
-        margin: 0.6rem 0 0 0;
+      .quote-note {
+        margin: 0.75rem 0 0 0;
         font-size: 0.8rem;
         color: var(--peak);
-        text-align: right;
-      }
-      .options-hint.is-ready {
-        display: none;
       }
     </style>
-
-    <script>
-      // Require a font + thread color pick before "Buy Now" is usable, then
-      // carry the pick into Stripe via the client_reference_id URL param so
-      // it's attached to the payment (visible in the Stripe Dashboard).
-      // client_reference_id only accepts letters, numbers, dashes and
-      // underscores — anything else is silently dropped by Stripe.
-      function slugify(value: string) {
-        return value.replace(/[^a-zA-Z0-9]+/g, "");
-      }
-
-      document.querySelectorAll<HTMLAnchorElement>("[data-buy-link]").forEach((link) => {
-        const optionsId = link.dataset.productOptions;
-        const baseHref = link.dataset.baseHref;
-        if (!optionsId || !baseHref) return;
-
-        const fontSelect = document.getElementById(`${optionsId}-font`) as HTMLSelectElement | null;
-        const threadSelect = document.getElementById(`${optionsId}-thread`) as HTMLSelectElement | null;
-        const accentSelect = document.getElementById(`${optionsId}-accent`) as HTMLSelectElement | null;
-        const hint = document.querySelector(`[data-options-hint="${optionsId}"]`);
-        if (!fontSelect || !threadSelect) return;
-
-        const update = () => {
-          const font = fontSelect.value;
-          const thread = threadSelect.value;
-          const accent = accentSelect?.value;
-          const ready = Boolean(font && thread);
-
-          if (ready) {
-            const parts = [`FONT_${slugify(font)}`, `THREAD_${slugify(thread)}`];
-            if (accent) parts.push(`ACCENT_${slugify(accent)}`);
-            const ref = parts.join("-").slice(0, 200);
-            link.href = `${baseHref}?client_reference_id=${encodeURIComponent(ref)}`;
-            link.classList.remove("is-disabled");
-            link.removeAttribute("aria-disabled");
-            hint?.classList.add("is-ready");
-          } else {
-            link.href = "#";
-            link.classList.add("is-disabled");
-            link.setAttribute("aria-disabled", "true");
-            hint?.classList.remove("is-ready");
-          }
-        };
-
-        fontSelect.addEventListener("change", update);
-        threadSelect.addEventListener("change", update);
-        accentSelect?.addEventListener("change", update);
-        update();
-      });
-    </script>
   </body>
 </html>

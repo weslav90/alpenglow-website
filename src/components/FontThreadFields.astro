@@ -149,6 +149,10 @@ const { idPrefix, namePrefix = idPrefix, required = true } = Astro.props;
 				}
 			};
 			select.addEventListener("change", apply);
+			// A successful submit calls form.reset(), which clears the <select>
+			// without firing "change" — repaint after the reset lands so the
+			// swatch doesn't keep showing the previous order's color.
+			select.form?.addEventListener("reset", () => setTimeout(apply, 0));
 			apply();
 		});
 	}
