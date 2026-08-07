@@ -1,7 +1,7 @@
 # Alpenglow Crafting Company
 
-The website for **Alpenglow Crafting Company** — custom embroidery, artisan sewing, and
-handcrafted goods, built with [Astro](https://astro.build) and deployed on
+The website for **Alpenglow Crafting Company** — custom embroidery, built with
+[Astro](https://astro.build) and deployed on
 [Cloudflare Workers](https://developers.cloudflare.com/workers/static-assets/).
 
 ## 🚀 Project Structure
