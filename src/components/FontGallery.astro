@@ -1,0 +1,149 @@
+---
+// "Browse Our Fonts" gallery — shown on the home page so customers can see
+// what each embroidery font looks like before picking one from a dropdown
+// on the Shop or Custom Order page. CSS-only tabs (radio buttons), no JS.
+import { FONT_CATEGORIES } from "../data/fonts";
+---
+
+<section id="fonts" class="section fonts-section">
+	<span class="eyebrow">Personalize Your Order</span>
+	<h2>Browse our fonts</h2>
+	<p class="section-sub">
+		These are the embroidery font styles available for custom orders and personalized
+		ready-made pieces. Pick a category, then choose your favorite by name when you order.
+	</p>
+
+	<div class="font-tabs">
+		{
+			FONT_CATEGORIES.map((cat, i) => (
+				<input
+					type="radio"
+					name="font-tab"
+					id={`font-tab-${i}`}
+					class="font-tab-input"
+					checked={i === 0}
+				/>
+			))
+		}
+
+		<div class="font-tab-labels" role="tablist">
+			{
+				FONT_CATEGORIES.map((cat, i) => (
+					<label for={`font-tab-${i}`} class="font-tab-label">
+						{cat.name}
+					</label>
+				))
+			}
+		</div>
+
+		{
+			FONT_CATEGORIES.map((cat, i) => (
+				<div class={`font-tab-panel font-tab-panel-${i}`}>
+					<p class="font-tab-desc">{cat.description}</p>
+					{cat.twoColorFonts && cat.twoColorFonts.length > 0 && (
+						<p class="font-tab-note">
+							✨ {cat.twoColorFonts.join(" and ")} support a second (accent) thread color.
+						</p>
+					)}
+					{cat.images.map((src) => (
+						<img src={src} alt={`${cat.name} font samples`} loading="lazy" class="font-tab-image" />
+					))}
+				</div>
+			))
+		}
+	</div>
+
+	<p class="font-caveat">
+		Some fonts are uppercase-only or lowercase-only — we'll confirm formatting with you while
+		preparing your order.
+	</p>
+</section>
+
+<style>
+	.fonts-section {
+		text-align: center;
+	}
+	.fonts-section .section-sub {
+		max-width: 620px;
+		margin: -0.5rem auto 0 auto;
+	}
+	.font-tabs {
+		margin-top: 2rem;
+		text-align: left;
+	}
+	.font-tab-input {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+	.font-tab-labels {
+		display: flex;
+		justify-content: center;
+		gap: 0.6em;
+		flex-wrap: wrap;
+		margin-bottom: 2rem;
+	}
+	.font-tab-label {
+		padding: 0.6em 1.4em;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		background: var(--card);
+		color: var(--ink);
+		font-family: "Manrope", sans-serif;
+		font-weight: 700;
+		font-size: 0.95rem;
+		cursor: pointer;
+		transition: background 0.15s ease, color 0.15s ease;
+	}
+	.font-tab-panel {
+		display: none;
+		max-width: 900px;
+		margin: 0 auto;
+	}
+	.font-tab-desc {
+		text-align: center;
+		color: var(--peak);
+		margin-top: 0;
+	}
+	.font-tab-note {
+		text-align: center;
+		color: var(--ink);
+		background: rgba(255, 182, 39, 0.14);
+		border: 1px dashed var(--gold);
+		border-radius: 10px;
+		padding: 0.6rem 1rem;
+		font-size: 0.9rem;
+	}
+	.font-tab-image {
+		width: 100%;
+		height: auto;
+		display: block;
+		margin: 0 auto 1.5rem auto;
+		border-radius: 12px;
+		border: 1px solid var(--border);
+		box-shadow: var(--shadow-card);
+	}
+
+	/* NOTE: these rules are index-based (0/1/2) to match FONT_CATEGORIES in
+	   src/data/fonts.ts. Add another pair of rules here if a 4th category
+	   is ever added. */
+	#font-tab-0:checked ~ .font-tab-labels label[for="font-tab-0"],
+	#font-tab-1:checked ~ .font-tab-labels label[for="font-tab-1"],
+	#font-tab-2:checked ~ .font-tab-labels label[for="font-tab-2"] {
+		background: var(--rose);
+		color: white;
+		border-color: var(--rose);
+	}
+	#font-tab-0:checked ~ .font-tab-panel-0,
+	#font-tab-1:checked ~ .font-tab-panel-1,
+	#font-tab-2:checked ~ .font-tab-panel-2 {
+		display: block;
+	}
+
+	.font-caveat {
+		max-width: 620px;
+		margin: 2rem auto 0 auto;
+		font-size: 0.85rem;
+		color: var(--peak);
+	}
+</style>

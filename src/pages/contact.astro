@@ -3,6 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StitchDivider from '../components/StitchDivider.astro';
+import FontThreadFields from '../components/FontThreadFields.astro';
 import { SITE_TITLE } from '../consts';
 
 const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf-9714-a9957d73f0a4";
@@ -70,6 +71,15 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
                 <option value="Apparel / Patch">Apparel / Fabric Patch</option>
                 <option value="General Inquiry">General Inquiry</option>
               </select>
+            </div>
+
+            <div class="form-group">
+              <p class="options-intro">
+                Already know what you want? Pick a font and thread color — browse the
+                <a href="/#fonts">full font guide</a> if you'd like to see them first. Not sure yet?
+                Skip this and just describe it below.
+              </p>
+              <FontThreadFields idPrefix="contact" namePrefix="contact" required={false} />
             </div>
 
             <div class="form-group">
@@ -147,6 +157,8 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
       .required { color: var(--rose); }
       .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-family: inherit; }
       .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: 2px solid var(--violet); outline-offset: 1px; }
+      .options-intro { font-size: 0.85rem; color: var(--peak); margin: 0 0 0.85rem 0; }
+      .options-intro a { color: var(--rose); font-weight: 600; text-decoration: none; }
       .submit-btn { width: 100%; text-align: center; border: none; font-size: 1rem; }
       .result-message { display: none; margin-top: 1rem; padding: 0.875rem; border-radius: 8px; font-size: 0.875rem; text-align: center; }
       .result-message.pending { background-color: #fdf0e8; color: var(--coral); }

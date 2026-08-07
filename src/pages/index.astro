@@ -3,6 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StitchDivider from '../components/StitchDivider.astro';
+import FontGallery from '../components/FontGallery.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import { products } from '../data/products';
 
@@ -76,6 +77,10 @@ const featured = products.slice(0, 3);
           <a href="/shop" class="btn btn-secondary">See the full shop</a>
         </div>
       </section>
+
+      <StitchDivider />
+
+      <FontGallery />
 
       <StitchDivider />
 
