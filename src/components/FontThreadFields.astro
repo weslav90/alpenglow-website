@@ -1,0 +1,156 @@
+---
+// Reusable "Font Style" + "Thread Color" (+ optional accent color) picker.
+// Used on the Shop page (per customizable product) and the custom-order
+// Contact form, so every place customers personalize an order looks and
+// behaves the same way.
+import { FONT_CATEGORIES } from "../data/fonts";
+import { THREAD_COLORS } from "../data/threadColors";
+
+interface Props {
+	/** Unique prefix so multiple pickers can live on one page (e.g. per product card). */
+	idPrefix: string;
+	/** Field name prefix used for form submission (contact form) — defaults to idPrefix. */
+	namePrefix?: string;
+	/** Whether Font Style + Thread Color are required fields. Default true. */
+	required?: boolean;
+}
+
+const { idPrefix, namePrefix = idPrefix, required = true } = Astro.props;
+---
+
+<div class="ft-fields" data-ft-fields>
+	<div class="ft-field">
+		<label for={`${idPrefix}-font`}>Font Style {required && <span class="required">*</span>}</label>
+		<select id={`${idPrefix}-font`} name={`${namePrefix}_font_style`} required={required} data-ft-role="font">
+			<option value="" disabled selected>Choose a font…</option>
+			{
+				FONT_CATEGORIES.map((cat) => (
+					<optgroup label={cat.name}>
+						{cat.fonts.map((f) => (
+							<option value={f}>{f}</option>
+						))}
+					</optgroup>
+				))
+			}
+		</select>
+	</div>
+
+	<div class="ft-field">
+		<label for={`${idPrefix}-thread`}>Thread Color {required && <span class="required">*</span>}</label>
+		<div class="ft-color-row">
+			<select id={`${idPrefix}-thread`} name={`${namePrefix}_thread_color`} required={required} data-ft-role="thread">
+				<option value="" disabled selected>Choose a thread color…</option>
+				{
+					THREAD_COLORS.map((c) => (
+						<option value={`${c.code} ${c.name}`} data-hex={c.hex}>
+							{c.code} — {c.name}
+						</option>
+					))
+				}
+			</select>
+			<span class="ft-swatch" data-ft-swatch aria-hidden="true"></span>
+		</div>
+	</div>
+
+	<div class="ft-field">
+		<label for={`${idPrefix}-accent`}>
+			Accent Thread Color <span class="optional">(optional — for two-tone monogram styles)</span>
+		</label>
+		<div class="ft-color-row">
+			<select id={`${idPrefix}-accent`} name={`${namePrefix}_accent_thread_color`} data-ft-role="accent">
+				<option value="" selected>None</option>
+				{
+					THREAD_COLORS.map((c) => (
+						<option value={`${c.code} ${c.name}`} data-hex={c.hex}>
+							{c.code} — {c.name}
+						</option>
+					))
+				}
+			</select>
+			<span class="ft-swatch" data-ft-swatch aria-hidden="true"></span>
+		</div>
+	</div>
+</div>
+
+<style>
+	.ft-fields {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	.ft-field label {
+		display: block;
+		font-size: 0.85rem;
+		font-weight: 700;
+		margin-bottom: 0.35rem;
+		font-family: "Manrope", sans-serif;
+	}
+	.ft-field .required {
+		color: var(--rose);
+	}
+	.ft-field .optional {
+		font-weight: 400;
+		color: var(--peak);
+	}
+	.ft-field select {
+		width: 100%;
+		padding: 0.65rem;
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		box-sizing: border-box;
+		font-family: inherit;
+		background: var(--card);
+		color: var(--ink);
+	}
+	.ft-field select:focus {
+		outline: 2px solid var(--violet);
+		outline-offset: 1px;
+	}
+	.ft-color-row {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+	}
+	.ft-color-row select {
+		flex: 1;
+	}
+	.ft-swatch {
+		flex-shrink: 0;
+		width: 2.1rem;
+		height: 2.1rem;
+		border-radius: 8px;
+		border: 1px solid var(--border);
+		background: repeating-linear-gradient(
+			45deg,
+			#f0f0f0,
+			#f0f0f0 4px,
+			#ffffff 4px,
+			#ffffff 8px
+		);
+	}
+</style>
+
+<script>
+	// Update each color swatch preview whenever its <select> changes, and
+	// keep it in sync on initial load (e.g. back/forward navigation).
+	function initSwatches(root: ParentNode) {
+		root.querySelectorAll<HTMLSelectElement>("select[data-ft-role='thread'], select[data-ft-role='accent']").forEach((select) => {
+			const row = select.closest(".ft-color-row");
+			const swatch = row?.querySelector<HTMLElement>("[data-ft-swatch]");
+			if (!swatch) return;
+			const apply = () => {
+				const opt = select.selectedOptions[0];
+				const hex = opt?.dataset.hex;
+				if (hex) {
+					swatch.style.background = hex;
+				} else {
+					swatch.style.background =
+						"repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 4px, #ffffff 4px, #ffffff 8px)";
+				}
+			};
+			select.addEventListener("change", apply);
+			apply();
+		});
+	}
+	initSwatches(document);
+</script>
