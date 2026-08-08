@@ -132,9 +132,18 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
           // structured field that survives into an email trigger as its own
           // value, so packing the order summary into it means a Trello card can
           // map its title straight from the subject with no body parsing.
-          // Keep the "New Hat Order" prefix stable — inbox filters match on it.
+          // Keep the "New Hat Order" prefix stable - inbox filters match on it.
+          //
+          // Everything we add here stays ASCII: the subject becomes an email
+          // header, and non-ASCII in a header has to be MIME-encoded to survive
+          // the hop to the mailbox. Control characters are stripped too, since a
+          // newline in a header is a header-injection vector.
           const tidy = (value: FormDataEntryValue | null, max: number) =>
-            String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
+            String(value ?? '')
+              .replace(/[\x00-\x1F\x7F]/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .slice(0, max);
 
           const customer = tidy(formData.get('name'), 40);
           const stitchText = tidy(formData.get('embroidery_text'), 30);
@@ -143,9 +152,9 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
           const summary = [
             customer,
             qty && qty !== '1' ? `${qty}x ${stitchText}` : stitchText,
-          ].filter(Boolean).join(' — ');
+          ].filter(Boolean).join(' - ');
 
-          formData.set('subject', summary ? `New Hat Order — ${summary}` : 'New Hat Order');
+          formData.set('subject', summary ? `New Hat Order - ${summary}` : 'New Hat Order');
 
           const json = JSON.stringify(Object.fromEntries(formData));
 
@@ -157,17 +166,24 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
             });
             const jsonResponse = await response.json();
 
-            if (response.status === 200) {
+            // Web3Forms answers HTTP 200 with {"success": false} when it
+            // rejects a submission, so the status alone is not enough - going
+            // by it reports a rejected order to the customer as sent.
+            if (response.ok && jsonResponse.success !== false) {
               result.className = "result-message success";
               result.innerText = "Thank you! We'll email you a quote for your cap shortly.";
               form.reset();
             } else {
+              console.error('Web3Forms rejected the submission', response.status, jsonResponse);
               result.className = "result-message error";
-              result.innerText = jsonResponse.message || "Something went wrong. Please try again.";
+              result.innerText = jsonResponse.message
+                ? `Couldn't send: ${jsonResponse.message}`
+                : "Something went wrong. Please email orders@alpenglowcrafts.com.";
             }
           } catch (error) {
+            console.error('Web3Forms request failed', error);
             result.className = "result-message error";
-            result.innerText = "Network error. Please try again.";
+            result.innerText = "Network error. Please try again, or email orders@alpenglowcrafts.com.";
           } finally {
             submitBtn.disabled = false;
             submitBtn.innerText = "Request My Quote";
