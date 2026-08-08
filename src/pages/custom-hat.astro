@@ -170,6 +170,10 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
             // rejects a submission, so the status alone is not enough - going
             // by it reports a rejected order to the customer as sent.
             if (response.ok && jsonResponse.success !== false) {
+              // Logged on success too: Web3Forms can accept a submission and
+              // still drop it (its spam filter and honeypot both answer with
+              // success), so this is the only trace left when one goes missing.
+              console.info('Web3Forms accepted the submission', jsonResponse);
               result.className = "result-message success";
               result.innerText = "Thank you! We'll email you a quote for your cap shortly.";
               form.reset();
