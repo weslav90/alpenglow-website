@@ -12,7 +12,7 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={`Custom Order | ${SITE_TITLE}`} description="Submit a custom embroidery or sewing request." />
+    <BaseHead title={`Custom Order | ${SITE_TITLE}`} description="Submit a custom embroidery request." />
   </head>
   <body>
     <Header />
@@ -21,7 +21,7 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
         <span class="eyebrow">Custom Order</span>
         <h1>Tell us what you're picturing</h1>
         <p>
-          Have a custom sewing or embroidery project in mind? Fill out the form below with your project details, and we'll respond with a quote within 24–48 hours.
+          Have a custom embroidery project in mind? Fill out the form below with your project details, and we'll respond with a quote within 24–48 hours.
         </p>
       </div>
 
@@ -50,7 +50,8 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
         <div class="form-card">
           <form id="contact-form">
             <input type="hidden" name="access_key" value={web3formsKey} />
-            <input type="hidden" name="subject" value="New Craft Order Request - Alpenglow Crafts" />
+            <!-- Replaced at submit time with a per-order summary; see the script below. -->
+            <input type="hidden" name="subject" value="New Custom Order" />
             <input type="hidden" name="order_type" value="Custom Order" />
             <input type="hidden" name="next_step" value="Waiting Invoice Response" />
             <input type="checkbox" name="botcheck" id="botcheck" style="display: none;" />
@@ -69,8 +70,6 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
               <label for="project_type">Project Type</label>
               <select id="project_type" name="project_type">
                 <option value="Custom Embroidery">Custom Embroidery / Monogram</option>
-                <option value="Custom Sewing">Custom Sewing Craft</option>
-                <option value="Apparel / Patch">Apparel / Fabric Patch</option>
                 <option value="General Inquiry">General Inquiry</option>
               </select>
             </div>
@@ -112,6 +111,19 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
           result.innerText = "Submitting your request...";
 
           const formData = new FormData(form);
+
+          // See custom-hat.astro — the subject carries the order summary so a
+          // Trello card title can map straight from it instead of parsing the
+          // email body. Keep the "New Custom Order" prefix stable for filters.
+          const tidy = (value: FormDataEntryValue | null, max: number) =>
+            String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
+
+          const customer = tidy(formData.get('name'), 40);
+          const projectType = tidy(formData.get('project_type'), 40);
+
+          const summary = [customer, projectType].filter(Boolean).join(' — ');
+          formData.set('subject', summary ? `New Custom Order — ${summary}` : 'New Custom Order');
+
           const json = JSON.stringify(Object.fromEntries(formData));
 
           try {

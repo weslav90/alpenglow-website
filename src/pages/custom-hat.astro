@@ -51,7 +51,8 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
         <div class="form-card">
           <form id="custom-hat-form">
             <input type="hidden" name="access_key" value={web3formsKey} />
-            <input type="hidden" name="subject" value="New Custom Hat Order - Alpenglow Crafts" />
+            <!-- Replaced at submit time with a per-order summary; see the script below. -->
+            <input type="hidden" name="subject" value="New Hat Order" />
             <input type="hidden" name="order_type" value="Custom Hat" />
             <input type="hidden" name="next_step" value="Waiting Invoice Response" />
             <input type="checkbox" name="botcheck" id="hat-botcheck" style="display: none;" />
@@ -126,6 +127,26 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
           result.innerText = "Submitting your request...";
 
           const formData = new FormData(form);
+
+          // Build a per-submission subject line. The subject is the only short,
+          // structured field that survives into an email trigger as its own
+          // value, so packing the order summary into it means a Trello card can
+          // map its title straight from the subject with no body parsing.
+          // Keep the "New Hat Order" prefix stable — inbox filters match on it.
+          const tidy = (value: FormDataEntryValue | null, max: number) =>
+            String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
+
+          const customer = tidy(formData.get('name'), 40);
+          const stitchText = tidy(formData.get('embroidery_text'), 30);
+          const qty = tidy(formData.get('quantity'), 4);
+
+          const summary = [
+            customer,
+            qty && qty !== '1' ? `${qty}x ${stitchText}` : stitchText,
+          ].filter(Boolean).join(' — ');
+
+          formData.set('subject', summary ? `New Hat Order — ${summary}` : 'New Hat Order');
+
           const json = JSON.stringify(Object.fromEntries(formData));
 
           try {
