@@ -42,4 +42,22 @@ export const products: Product[] = [
 		customOrderHref: "/custom-hat",
 		ctaLabel: "Design Yours",
 	},
+	{
+		name: "Custom Monogrammed Backpack",
+		price: "Custom quote",
+		description:
+			"A backpack finished with your own script monogram (and a bow, if you'd like one). Choose your font and thread color, tell us your initials, and we'll send you a quote before we start.",
+		image: "/gallery/backpack-monogram.jpg",
+		customOrderHref: "/custom-backpack",
+		ctaLabel: "Design Yours",
+	},
+	{
+		name: "Custom Embroidered Banner",
+		price: "Custom quote",
+		description:
+			"A keepsake pennant banner embroidered with your own text — perfect for a first day of school, birthday, or milestone moment. Choose your font, thread color, and ribbon fringe.",
+		image: "/gallery/banner-first-day.jpg",
+		customOrderHref: "/custom-banner",
+		ctaLabel: "Design Yours",
+	},
 ];
