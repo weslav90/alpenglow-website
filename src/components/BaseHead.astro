@@ -7,11 +7,22 @@ interface Props {
 	title: string;
 	description: string;
 	image?: string;
+	/** Alt text and dimensions for `image`. Only meaningful when overriding the default og-image.jpg. */
+	imageAlt?: string;
+	imageWidth?: number;
+	imageHeight?: number;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image = '/embroidered-cap.jpg' } = Astro.props;
+const {
+	title,
+	description,
+	image = '/og-image.jpg',
+	imageAlt = 'Alpenglow Crafting Company — custom embroidery, warmth & art in every stitch',
+	imageWidth = 1200,
+	imageHeight = 630,
+} = Astro.props;
 ---
 
 <!-- Global Metadata -->
@@ -42,6 +53,9 @@ const { title, description, image = '/embroidered-cap.jpg' } = Astro.props;
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={new URL(image, Astro.url)} />
+<meta property="og:image:width" content={String(imageWidth)} />
+<meta property="og:image:height" content={String(imageHeight)} />
+<meta property="og:image:alt" content={imageAlt} />
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
