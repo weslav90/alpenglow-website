@@ -1,0 +1,121 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import StitchDivider from '../components/StitchDivider.astro';
+import { SITE_TITLE } from '../consts';
+import { galleryItems } from '../data/gallery';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`Gallery | ${SITE_TITLE}`}
+      description="Real custom embroidery we've stitched — monogrammed bags, jackets, and keepsakes — for inspiration on your own order."
+    />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <section class="section intro">
+        <span class="eyebrow">Custom Work</span>
+        <h1>See what we've stitched</h1>
+        <p class="lede">
+          A few pieces we've made for customers, to help you picture what's possible. Pick a
+          font from our <a href="/#fonts">font guide</a> and a color from our
+          <a href="/#threads">thread colors</a>, then <a href="/contact">start your own order</a>.
+        </p>
+      </section>
+
+      <StitchDivider />
+
+      <section class="section">
+        <div class="grid">
+          {galleryItems.map((item) => (
+            <a href={`${item.image}.jpg`} target="_blank" rel="noopener" class="gallery-item">
+              <picture>
+                <source srcset={`${item.image}.webp`} type="image/webp" />
+                <img src={`${item.image}.jpg`} alt={item.alt} loading="lazy" />
+              </picture>
+              <div class="gallery-body">
+                <h3>{item.name}</h3>
+                <p>{item.description}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <StitchDivider />
+
+      <section class="section cta">
+        <h2>Have something like this in mind?</h2>
+        <p>
+          Every piece starts with a quote, so there's no commitment until you approve it.
+          Tell us what you're picturing and we'll take it from there.
+        </p>
+        <a href="/contact" class="btn btn-primary">Start a Custom Order</a>
+      </section>
+    </main>
+    <Footer />
+
+    <style>
+      .intro {
+        text-align: center;
+      }
+      .intro .lede {
+        color: var(--peak);
+        max-width: 620px;
+        margin: 0 auto;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 2rem;
+      }
+      .gallery-item {
+        display: block;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-card);
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .gallery-item:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-soft);
+      }
+      .gallery-item img {
+        width: 100%;
+        aspect-ratio: 4 / 5;
+        object-fit: cover;
+        border-radius: 0;
+        display: block;
+      }
+      .gallery-body {
+        padding: 1.25rem 1.5rem 1.5rem 1.5rem;
+      }
+      .gallery-body h3 {
+        margin-bottom: 0.4em;
+        color: var(--ink);
+      }
+      .gallery-body p {
+        color: var(--peak);
+        font-size: 0.92rem;
+        margin: 0;
+      }
+      .cta {
+        text-align: center;
+      }
+      .cta p {
+        max-width: 560px;
+        margin: 0 auto 1.5rem auto;
+        color: var(--peak);
+      }
+    </style>
+  </body>
+</html>

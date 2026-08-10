@@ -7,8 +7,10 @@ import FontGallery from '../components/FontGallery.astro';
 import ThreadColorGallery from '../components/ThreadColorGallery.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import { products } from '../data/products';
+import { galleryItems } from '../data/gallery';
 
 const featured = products.slice(0, 3);
+const galleryPreview = galleryItems.slice(0, 4);
 ---
 
 <!doctype html>
@@ -72,6 +74,28 @@ const featured = products.slice(0, 3);
         </div>
         <div class="shop-cta">
           <a href="/shop" class="btn btn-secondary">See the full shop</a>
+        </div>
+      </section>
+
+      <StitchDivider />
+
+      <!-- Custom work gallery teaser -->
+      <section class="section">
+        <h2>See what we've stitched</h2>
+        <p class="section-sub">Real custom pieces made for customers, for a little inspiration.</p>
+        <div class="grid gallery-preview-grid">
+          {galleryPreview.map((item) => (
+            <a href="/gallery" class="gallery-preview-card">
+              <picture>
+                <source srcset={`${item.image}.webp`} type="image/webp" />
+                <img src={`${item.image}.jpg`} alt={item.alt} loading="lazy" />
+              </picture>
+              <h3>{item.name}</h3>
+            </a>
+          ))}
+        </div>
+        <div class="shop-cta">
+          <a href="/gallery" class="btn btn-secondary">See the full gallery</a>
         </div>
       </section>
 
@@ -182,6 +206,31 @@ const featured = products.slice(0, 3);
       .shop-cta {
         text-align: center;
         margin-top: 2.5rem;
+      }
+      .gallery-preview-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+      .gallery-preview-card {
+        display: block;
+        text-decoration: none;
+        text-align: center;
+        transition: transform 0.15s ease;
+      }
+      .gallery-preview-card:hover {
+        transform: translateY(-4px);
+      }
+      .gallery-preview-card img {
+        width: 100%;
+        aspect-ratio: 4 / 5;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: var(--shadow-card);
+        display: block;
+      }
+      .gallery-preview-card h3 {
+        font-size: 1rem;
+        margin: 0.75em 0 0 0;
+        color: var(--ink);
       }
       .story-teaser {
         text-align: center;
