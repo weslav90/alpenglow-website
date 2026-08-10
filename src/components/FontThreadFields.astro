@@ -21,18 +21,23 @@ const { idPrefix, namePrefix = idPrefix, required = true } = Astro.props;
 <div class="ft-fields" data-ft-fields>
 	<div class="ft-field">
 		<label for={`${idPrefix}-font`}>Font Style {required && <span class="required">*</span>}</label>
-		<select id={`${idPrefix}-font`} name={`${namePrefix}_font_style`} required={required} data-ft-role="font">
-			<option value="" disabled selected>Choose a font…</option>
-			{
-				FONT_CATEGORIES.map((cat) => (
-					<optgroup label={cat.name}>
-						{cat.fonts.map((f) => (
-							<option value={f}>{f}</option>
-						))}
-					</optgroup>
-				))
-			}
-		</select>
+		<div class="ft-color-row">
+			<select id={`${idPrefix}-font`} name={`${namePrefix}_font_style`} required={required} data-ft-role="font">
+				<option value="" disabled selected>Choose a font…</option>
+				{
+					FONT_CATEGORIES.map((cat) => (
+						<optgroup label={cat.name}>
+							{cat.fonts.map((f) => (
+								<option value={f.name} data-img={f.image}>{f.name}</option>
+							))}
+						</optgroup>
+					))
+				}
+			</select>
+			<span class="ft-font-preview" data-ft-font-preview aria-hidden="true">
+				<img alt="" />
+			</span>
+		</div>
 	</div>
 
 	<div class="ft-field">
@@ -128,6 +133,29 @@ const { idPrefix, namePrefix = idPrefix, required = true } = Astro.props;
 			#ffffff 8px
 		);
 	}
+	.ft-font-preview {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 5.5rem;
+		height: 2.6rem;
+		border-radius: 8px;
+		border: 1px solid var(--border);
+		background: #ffffff;
+		overflow: hidden;
+		padding: 0.25rem;
+		box-sizing: border-box;
+	}
+	.ft-font-preview img {
+		max-width: 100%;
+		max-height: 100%;
+		object-fit: contain;
+		display: none;
+	}
+	.ft-font-preview img[src] {
+		display: block;
+	}
 </style>
 
 <script>
@@ -157,4 +185,30 @@ const { idPrefix, namePrefix = idPrefix, required = true } = Astro.props;
 		});
 	}
 	initSwatches(document);
+
+	// Same idea for the Font Style picker: show a small sample image of the
+	// selected font next to the dropdown, the way the thread swatch shows a
+	// color preview.
+	function initFontPreviews(root: ParentNode) {
+		root.querySelectorAll<HTMLSelectElement>("select[data-ft-role='font']").forEach((select) => {
+			const row = select.closest(".ft-color-row");
+			const img = row?.querySelector<HTMLImageElement>("[data-ft-font-preview] img");
+			if (!img) return;
+			const apply = () => {
+				const opt = select.selectedOptions[0];
+				const src = opt?.dataset.img;
+				if (src) {
+					img.src = src;
+					img.alt = `Preview of the ${opt.textContent} font`;
+				} else {
+					img.removeAttribute("src");
+					img.alt = "";
+				}
+			};
+			select.addEventListener("change", apply);
+			select.form?.addEventListener("reset", () => setTimeout(apply, 0));
+			apply();
+		});
+	}
+	initFontPreviews(document);
 </script>
