@@ -34,6 +34,14 @@ export const products: Product[] = [
 		paymentLink: "https://buy.stripe.com/bJebJ3ecv6TD50ZfQW1B601",
 	},
 	{
+		name: "Embroidered Socks",
+		price: "$10",
+		description:
+			"Soft white crew socks embroidered with a name and your choice of icon — personalize both at checkout.",
+		image: "/embroidered-socks.jpg",
+		paymentLink: "https://buy.stripe.com/cNi7sN1pJ1zj3WVbAG1B604",
+	},
+	{
 		name: "Custom Embroidered Baseball Cap",
 		price: "Custom quote",
 		description:
