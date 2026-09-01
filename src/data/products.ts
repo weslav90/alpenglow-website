@@ -22,6 +22,8 @@ export interface Product {
 	customOrderHref?: string;
 	/** Overrides the call-to-action label. Defaults per product kind. */
 	ctaLabel?: string;
+	/** Set to "halloween" to show this product in the seasonal Halloween section instead of the main grid. */
+	category?: "halloween";
 }
 
 export const products: Product[] = [
@@ -67,5 +69,31 @@ export const products: Product[] = [
 		image: "/gallery/banner-first-day.jpg",
 		customOrderHref: "/custom-banner",
 		ctaLabel: "Design Yours",
+	},
+	{
+		name: "Halloween Basket with Pumpkin and Name",
+		price: "$25",
+		description:
+			"A gingham trick-or-treat basket with an appliqué pumpkin, embroidered with the name of your choice.",
+		image: "/halloween-basket-pumpkin-name.jpg",
+		paymentLink: "https://buy.stripe.com/dRmaEZfgz7XH653eMS1B605",
+		category: "halloween",
+	},
+	{
+		name: "Halloween Basket with Jack-o'-Lantern",
+		price: "$15",
+		description: "A gingham trick-or-treat basket embroidered with a classic jack-o'-lantern face.",
+		image: "/halloween-basket-jack-o-lantern.jpg",
+		paymentLink: "https://buy.stripe.com/cNi14p7O7em579734a1B606",
+		category: "halloween",
+	},
+	{
+		name: "Halloween Basket with Name",
+		price: "$20",
+		description:
+			"A black-and-white gingham trick-or-treat basket embroidered with the name of your choice.",
+		image: "/halloween-basket-monogram.jpg",
+		paymentLink: "https://buy.stripe.com/5kQcN75FZdi1bpnawC1B607",
+		category: "halloween",
 	},
 ];

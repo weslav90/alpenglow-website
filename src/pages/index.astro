@@ -9,7 +9,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import { products } from '../data/products';
 import { galleryItems } from '../data/gallery';
 
-const featured = products.slice(0, 3);
+const featured = products.filter((product) => product.category !== 'halloween').slice(0, 3);
 const galleryPreview = galleryItems.slice(0, 4);
 ---
 

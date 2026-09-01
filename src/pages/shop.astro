@@ -5,6 +5,9 @@ import Footer from '../components/Footer.astro';
 import StitchDivider from '../components/StitchDivider.astro';
 import { SITE_TITLE } from '../consts';
 import { products } from '../data/products';
+
+const mainProducts = products.filter((product) => product.category !== 'halloween');
+const halloweenProducts = products.filter((product) => product.category === 'halloween');
 ---
 
 <!doctype html>
@@ -32,7 +35,7 @@ import { products } from '../data/products';
 
       <section class="section">
         <div class="grid">
-          {products.map((product) => (
+          {mainProducts.map((product) => (
             <div class="product">
               <img src={product.image} alt={product.name} />
               <div class="product-body">
@@ -58,6 +61,38 @@ import { products } from '../data/products';
           ))}
         </div>
       </section>
+
+      {halloweenProducts.length > 0 && (
+        <>
+          <StitchDivider />
+
+          <section class="section halloween-section">
+            <span class="eyebrow">Limited Time</span>
+            <h2>🎃 Halloween Collection</h2>
+            <p class="lede">
+              Personalized trick-or-treat baskets, embroidered to order — get yours before the
+              baskets start filling up.
+            </p>
+            <div class="grid">
+              {halloweenProducts.map((product) => (
+                <div class="product">
+                  <img src={product.image} alt={product.name} />
+                  <div class="product-body">
+                    <h3>{product.name}</h3>
+                    <p class="description">{product.description}</p>
+                    <div class="product-footer">
+                      <span class="price">{product.price}</span>
+                      <a href={product.paymentLink} class="btn btn-primary buy-btn">
+                        {product.ctaLabel ?? 'Buy Now'}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
     </main>
     <Footer />
 
@@ -69,6 +104,17 @@ import { products } from '../data/products';
         color: var(--peak);
         max-width: 600px;
         margin: 0 auto;
+      }
+      .halloween-section {
+        text-align: center;
+      }
+      .halloween-section .lede {
+        color: var(--peak);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .halloween-section .grid {
+        text-align: left;
       }
       .grid {
         display: grid;
