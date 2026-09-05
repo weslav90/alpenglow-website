@@ -12,11 +12,31 @@ import { SITE_TITLE } from '../consts';
       <HeaderLink href="/about">Our Story</HeaderLink>
       <HeaderLink href="/shop">Shop</HeaderLink>
       <HeaderLink href="/gallery">Gallery</HeaderLink>
+      <HeaderLink href="/cart" class="cart-link">
+        Cart <span id="cart-badge" class="cart-badge" hidden>0</span>
+      </HeaderLink>
       <HeaderLink href="/contact" class="order-link">Custom Order</HeaderLink>
     </div>
   </nav>
   <StitchDivider />
 </header>
+
+<script>
+  import { CART_EVENT, cartCount } from '../lib/cart';
+
+  function updateCartBadge() {
+    const badge = document.getElementById('cart-badge');
+    if (!badge) return;
+    const count = cartCount();
+    badge.textContent = String(count);
+    badge.hidden = count === 0;
+  }
+
+  updateCartBadge();
+  window.addEventListener(CART_EVENT, updateCartBadge);
+  // Keeps the badge in sync when the cart changes in another tab.
+  window.addEventListener('storage', updateCartBadge);
+</script>
 
 <style>
   header {
@@ -67,6 +87,18 @@ import { SITE_TITLE } from '../consts';
   }
   .internal-links :global(a.order-link:hover) {
     background: var(--violet);
+  }
+  .cart-badge {
+    display: inline-block;
+    min-width: 1.35em;
+    margin-left: 0.35em;
+    padding: 0.05em 0.4em;
+    border-radius: 999px;
+    background: var(--rose);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
   }
   @media (max-width: 640px) {
     nav {

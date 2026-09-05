@@ -1,0 +1,9 @@
+# Copy this file to .dev.vars for local development (`npm run dev`, `npm run preview`).
+# .dev.vars is gitignored — never commit real keys.
+#
+# Get this value from the Stripe Dashboard: Developers -> API keys -> Secret key.
+# Use a test-mode key (sk_test_...) for local development.
+#
+# In production (Cloudflare Workers), set the same variable with:
+#   npx wrangler secret put STRIPE_SECRET_KEY
+STRIPE_SECRET_KEY=sk_test_...
