@@ -1,0 +1,294 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import StitchDivider from '../components/StitchDivider.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`Cart | ${SITE_TITLE}`}
+      description="Review your cart and check out with Stripe."
+    />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <section class="section intro">
+        <span class="eyebrow">Cart</span>
+        <h1>Your Cart</h1>
+      </section>
+
+      <StitchDivider />
+
+      <section class="section">
+        <div id="cart-empty" class="empty-state" hidden>
+          <p>Your cart is empty.</p>
+          <a href="/shop" class="btn btn-primary">Continue Shopping</a>
+        </div>
+
+        <div id="cart-content" hidden>
+          <ul id="cart-list" class="cart-list"></ul>
+
+          <div class="cart-summary">
+            <span class="subtotal-label">Subtotal</span>
+            <span id="cart-subtotal" class="subtotal-value">$0.00</span>
+          </div>
+          <p class="tax-note">Tax and shipping, if any, are calculated by Stripe at checkout.</p>
+
+          <div id="cart-error" class="result-message error" hidden></div>
+
+          <button type="button" id="checkout-btn" class="btn btn-primary checkout-btn">
+            Checkout with Stripe
+          </button>
+        </div>
+      </section>
+    </main>
+    <Footer />
+
+    <script>
+      import { getCart, setQuantity, removeItem, parsePrice, CART_EVENT, type CartItem } from '../lib/cart';
+
+      const emptyState = document.getElementById('cart-empty') as HTMLElement;
+      const content = document.getElementById('cart-content') as HTMLElement;
+      const list = document.getElementById('cart-list') as HTMLUListElement;
+      const subtotalEl = document.getElementById('cart-subtotal') as HTMLElement;
+      const errorEl = document.getElementById('cart-error') as HTMLElement;
+      const checkoutBtn = document.getElementById('checkout-btn') as HTMLButtonElement;
+
+      function renderItem(item: CartItem): HTMLLIElement {
+        const li = document.createElement('li');
+        li.className = 'cart-item';
+        li.dataset.priceId = item.priceId;
+
+        const img = document.createElement('img');
+        img.src = item.image;
+        img.alt = item.name;
+        li.appendChild(img);
+
+        const details = document.createElement('div');
+        details.className = 'cart-item-details';
+
+        const name = document.createElement('h3');
+        name.textContent = item.name;
+        details.appendChild(name);
+
+        const price = document.createElement('p');
+        price.className = 'cart-item-price';
+        price.textContent = item.price;
+        details.appendChild(price);
+
+        const controls = document.createElement('div');
+        controls.className = 'cart-item-controls';
+
+        const decrement = document.createElement('button');
+        decrement.type = 'button';
+        decrement.className = 'qty-btn';
+        decrement.textContent = '−';
+        decrement.setAttribute('aria-label', `Decrease quantity of ${item.name}`);
+        decrement.addEventListener('click', () => setQuantity(item.priceId, item.quantity - 1));
+
+        const qty = document.createElement('span');
+        qty.className = 'qty-value';
+        qty.textContent = String(item.quantity);
+
+        const increment = document.createElement('button');
+        increment.type = 'button';
+        increment.className = 'qty-btn';
+        increment.textContent = '+';
+        increment.setAttribute('aria-label', `Increase quantity of ${item.name}`);
+        increment.addEventListener('click', () => setQuantity(item.priceId, item.quantity + 1));
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'remove-btn';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', () => removeItem(item.priceId));
+
+        controls.append(decrement, qty, increment, remove);
+        details.appendChild(controls);
+        li.appendChild(details);
+
+        return li;
+      }
+
+      function render() {
+        const items = getCart();
+
+        if (items.length === 0) {
+          emptyState.hidden = false;
+          content.hidden = true;
+          return;
+        }
+
+        emptyState.hidden = true;
+        content.hidden = false;
+
+        list.replaceChildren(...items.map(renderItem));
+
+        const subtotal = items.reduce((total, item) => total + parsePrice(item.price) * item.quantity, 0);
+        subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+      }
+
+      render();
+      window.addEventListener(CART_EVENT, render);
+      window.addEventListener('storage', render);
+
+      checkoutBtn.addEventListener('click', async () => {
+        const items = getCart();
+        if (items.length === 0) return;
+
+        errorEl.hidden = true;
+        checkoutBtn.disabled = true;
+        checkoutBtn.textContent = 'Redirecting to Stripe…';
+
+        try {
+          const response = await fetch('/api/create-checkout-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              items: items.map((item) => ({ priceId: item.priceId, quantity: item.quantity })),
+            }),
+          });
+
+          const json = await response.json();
+
+          if (response.ok && json.url) {
+            window.location.href = json.url;
+            return;
+          }
+
+          throw new Error(json.error || 'Could not start checkout.');
+        } catch (error) {
+          console.error('Checkout failed', error);
+          errorEl.hidden = false;
+          errorEl.textContent =
+            error instanceof Error ? error.message : 'Could not start checkout. Please try again.';
+          checkoutBtn.disabled = false;
+          checkoutBtn.textContent = 'Checkout with Stripe';
+        }
+      });
+    </script>
+
+    <style>
+      .intro {
+        text-align: center;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+      }
+      .empty-state p {
+        color: var(--peak);
+        margin-bottom: 1.5rem;
+      }
+      .cart-list {
+        list-style: none;
+        margin: 0 0 2rem 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        max-width: 700px;
+      }
+      .cart-item {
+        display: flex;
+        gap: 1rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: var(--shadow-card);
+      }
+      .cart-item img {
+        width: 96px;
+        height: 96px;
+        object-fit: cover;
+        border-radius: 8px;
+        flex-shrink: 0;
+      }
+      .cart-item-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        flex-grow: 1;
+      }
+      .cart-item-details h3 {
+        margin: 0;
+        font-size: 1.05rem;
+      }
+      .cart-item-price {
+        margin: 0;
+        color: var(--rose);
+        font-weight: 600;
+      }
+      .cart-item-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: auto;
+      }
+      .qty-btn {
+        width: 2em;
+        height: 2em;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: var(--cream);
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      .qty-value {
+        min-width: 1.5em;
+        text-align: center;
+        font-weight: 600;
+      }
+      .remove-btn {
+        margin-left: 0.75rem;
+        border: none;
+        background: none;
+        color: var(--peak);
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+      .cart-summary {
+        display: flex;
+        justify-content: space-between;
+        max-width: 700px;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+      .tax-note {
+        max-width: 700px;
+        font-size: 0.8rem;
+        color: var(--peak);
+        margin-top: 0.4rem;
+      }
+      .checkout-btn {
+        margin-top: 1.5rem;
+        width: 100%;
+        max-width: 700px;
+        text-align: center;
+        border: none;
+        font-size: 1rem;
+      }
+      .result-message {
+        margin-top: 1rem;
+        padding: 0.875rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        max-width: 700px;
+      }
+      .result-message.error {
+        background-color: #fff5f5;
+        color: #9b2c2c;
+        border: 1px solid #fed7d7;
+      }
+    </style>
+  </body>
+</html>

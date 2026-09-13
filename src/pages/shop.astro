@@ -46,10 +46,18 @@ const halloweenProducts = products.filter((product) => product.category === 'hal
                 )}
                 <div class="product-footer">
                   <span class="price">{product.price}</span>
-                  {product.paymentLink ? (
-                    <a href={product.paymentLink} class="btn btn-primary buy-btn">
-                      {product.ctaLabel ?? 'Buy Now'}
-                    </a>
+                  {product.priceId ? (
+                    <button
+                      type="button"
+                      class="btn btn-primary buy-btn add-to-cart-btn"
+                      data-add-to-cart
+                      data-price-id={product.priceId}
+                      data-name={product.name}
+                      data-price={product.price}
+                      data-image={product.image}
+                    >
+                      {product.ctaLabel ?? 'Add to Cart'}
+                    </button>
                   ) : (
                     <a href={product.customOrderHref} class="btn btn-primary buy-btn">
                       {product.ctaLabel ?? 'Design Yours'}
@@ -82,9 +90,17 @@ const halloweenProducts = products.filter((product) => product.category === 'hal
                     <p class="description">{product.description}</p>
                     <div class="product-footer">
                       <span class="price">{product.price}</span>
-                      <a href={product.paymentLink} class="btn btn-primary buy-btn">
-                        {product.ctaLabel ?? 'Buy Now'}
-                      </a>
+                      <button
+                        type="button"
+                        class="btn btn-primary buy-btn add-to-cart-btn"
+                        data-add-to-cart
+                        data-price-id={product.priceId}
+                        data-name={product.name}
+                        data-price={product.price}
+                        data-image={product.image}
+                      >
+                        {product.ctaLabel ?? 'Add to Cart'}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -95,6 +111,37 @@ const halloweenProducts = products.filter((product) => product.category === 'hal
       )}
     </main>
     <Footer />
+
+    <script>
+      import { addItem } from '../lib/cart';
+
+      const buttons = document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]');
+
+      buttons.forEach((button) => {
+        const defaultLabel = button.textContent ?? 'Add to Cart';
+
+        button.addEventListener('click', () => {
+          const { priceId, name, price, image } = button.dataset;
+          if (!priceId || !name || !price || !image) {
+            // Missing data attributes mean the product is missing its Stripe Price ID
+            // (see src/data/products.ts) — nothing to add, so leave the button alone.
+            console.error('Add to Cart button is missing product data', button.dataset);
+            return;
+          }
+
+          addItem({ priceId, name, price, image });
+
+          // Brief confirmation in place of a toast component, matching the
+          // relabel-on-submit pattern used on the custom order form.
+          button.disabled = true;
+          button.textContent = 'Added!';
+          window.setTimeout(() => {
+            button.disabled = false;
+            button.textContent = defaultLabel;
+          }, 1200);
+        });
+      });
+    </script>
 
     <style>
       .intro {

@@ -1,23 +1,27 @@
 // Products shown on the Shop page.
 //
 // There are two kinds:
-//   * Buy-it-now  — set `paymentLink` to a Stripe Payment Link. The customer
-//     gets exactly what the photo shows, at the listed price, in one click.
+//   * Buy-it-now  — set `priceId` to a Stripe Price ID. The customer adds it
+//     to a cart (src/lib/cart.ts) and can check out several products at once
+//     through one Stripe Checkout Session (src/pages/api/create-checkout-session.ts).
 //   * Made-to-order — set `customOrderHref` to a custom order form instead.
 //     These are quoted and invoiced by hand before any stitching starts, so
 //     they deliberately do NOT go straight to Stripe checkout.
 //
-// To add a buy-it-now product: create a Stripe Payment Link for it in the
-// Stripe Dashboard (Product catalog -> Add product -> Create payment link),
-// then add an entry here with that link as `paymentLink`.
+// To add a buy-it-now product: create the product and its Price in the
+// Stripe Dashboard (Product catalog -> Add product), then add an entry here
+// with that Price's ID (starts with "price_") as `priceId`. The checkout
+// endpoint only accepts price IDs that appear in this file, so a product
+// added here without a real Stripe Price ID will fail at checkout, not at
+// build time.
 
 export interface Product {
 	name: string;
 	price: string; // display string, e.g. "$35"
 	description: string;
 	image: string; // path under /public
-	/** Stripe Payment Link URL. Set this for buy-it-now products. */
-	paymentLink?: string;
+	/** Stripe Price ID (starts with "price_"). Set this for buy-it-now products. */
+	priceId?: string;
 	/** Custom order form path. Set this for made-to-order products. */
 	customOrderHref?: string;
 	/** Overrides the call-to-action label. Defaults per product kind. */
@@ -33,7 +37,7 @@ export const products: Product[] = [
 		description:
 			"Exactly as pictured — royal blue EAGLES lettering embroidered on a white cotton cap with a matching blue brim. Ready to order, no customization needed.",
 		image: "/embroidered-cap.jpg",
-		paymentLink: "https://buy.stripe.com/bJebJ3ecv6TD50ZfQW1B601",
+		priceId: "price_1U0uVIPwLggDTH96robxT2uz",
 	},
 	{
 		name: "Embroidered Socks",
@@ -41,7 +45,7 @@ export const products: Product[] = [
 		description:
 			"Soft white crew socks embroidered with a name and your choice of icon — personalize both at checkout.",
 		image: "/embroidered-socks.jpg",
-		paymentLink: "https://buy.stripe.com/cNi7sN1pJ1zj3WVbAG1B604",
+		priceId: "price_1UAqA5PwLggDTH961vScvdkb",
 	},
 	{
 		name: "Custom Embroidered Baseball Cap",
@@ -76,7 +80,7 @@ export const products: Product[] = [
 		description:
 			"A gingham trick-or-treat basket with an appliqué pumpkin, embroidered with the name of your choice.",
 		image: "/halloween-basket-pumpkin-name.jpg",
-		paymentLink: "https://buy.stripe.com/dRmaEZfgz7XH653eMS1B605",
+		priceId: "price_1UAsGpPwLggDTH96Zh0OvoXV",
 		category: "halloween",
 	},
 	{
@@ -84,7 +88,7 @@ export const products: Product[] = [
 		price: "$15",
 		description: "A gingham trick-or-treat basket embroidered with a classic jack-o'-lantern face.",
 		image: "/halloween-basket-jack-o-lantern.jpg",
-		paymentLink: "https://buy.stripe.com/cNi14p7O7em579734a1B606",
+		priceId: "price_1UAsFNPwLggDTH96gChCOQ6P",
 		category: "halloween",
 	},
 	{
@@ -93,7 +97,7 @@ export const products: Product[] = [
 		description:
 			"A black-and-white gingham trick-or-treat basket embroidered with the name of your choice.",
 		image: "/halloween-basket-monogram.jpg",
-		paymentLink: "https://buy.stripe.com/5kQcN75FZdi1bpnawC1B607",
+		priceId: "price_1UAsEbPwLggDTH96ov8my8gK",
 		category: "halloween",
 	},
 ];
