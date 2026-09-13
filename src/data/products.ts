@@ -37,7 +37,7 @@ export const products: Product[] = [
 		description:
 			"Exactly as pictured — royal blue EAGLES lettering embroidered on a white cotton cap with a matching blue brim. Ready to order, no customization needed.",
 		image: "/embroidered-cap.jpg",
-		priceId: "price_REPLACE_WITH_EAGLES_CAP_PRICE_ID",
+		priceId: "price_1U0uVIPwLggDTH96robxT2uz",
 	},
 	{
 		name: "Embroidered Socks",
@@ -45,7 +45,7 @@ export const products: Product[] = [
 		description:
 			"Soft white crew socks embroidered with a name and your choice of icon — personalize both at checkout.",
 		image: "/embroidered-socks.jpg",
-		priceId: "price_REPLACE_WITH_SOCKS_PRICE_ID",
+		priceId: "price_1UAqA5PwLggDTH961vScvdkb",
 	},
 	{
 		name: "Custom Embroidered Baseball Cap",
@@ -80,7 +80,7 @@ export const products: Product[] = [
 		description:
 			"A gingham trick-or-treat basket with an appliqué pumpkin, embroidered with the name of your choice.",
 		image: "/halloween-basket-pumpkin-name.jpg",
-		priceId: "price_REPLACE_WITH_PUMPKIN_BASKET_PRICE_ID",
+		priceId: "price_1UAsGpPwLggDTH96Zh0OvoXV",
 		category: "halloween",
 	},
 	{
@@ -88,7 +88,7 @@ export const products: Product[] = [
 		price: "$15",
 		description: "A gingham trick-or-treat basket embroidered with a classic jack-o'-lantern face.",
 		image: "/halloween-basket-jack-o-lantern.jpg",
-		priceId: "price_REPLACE_WITH_JACKOLANTERN_BASKET_PRICE_ID",
+		priceId: "price_1UAsFNPwLggDTH96gChCOQ6P",
 		category: "halloween",
 	},
 	{
@@ -97,7 +97,7 @@ export const products: Product[] = [
 		description:
 			"A black-and-white gingham trick-or-treat basket embroidered with the name of your choice.",
 		image: "/halloween-basket-monogram.jpg",
-		priceId: "price_REPLACE_WITH_NAME_BASKET_PRICE_ID",
+		priceId: "price_1UAsEbPwLggDTH96ov8my8gK",
 		category: "halloween",
 	},
 ];
