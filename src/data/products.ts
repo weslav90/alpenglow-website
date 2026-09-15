@@ -29,6 +29,21 @@ export interface ProductVariant {
 	priceId: string;
 }
 
+export interface PersonalizationField {
+	/** Used as the note's label, e.g. "Name" produces "Name: Emma" in the order note. */
+	key: string;
+	label: string;
+	type: "text" | "select";
+	/** Required when type is "select". */
+	options?: { label: string; value: string }[];
+	/**
+	 * Only required (and shown) when the currently selected variant's Price ID is in this list —
+	 * e.g. the phone number field on Name Tags only applies to the "Name & Phone Number" variant.
+	 * Omit to always show the field, including on products with no variants at all.
+	 */
+	showForVariants?: string[];
+}
+
 export interface Product {
 	name: string;
 	price: string; // display string, e.g. "$35", or a range like "$3–$5" for variant products
@@ -38,6 +53,14 @@ export interface Product {
 	priceId?: string;
 	/** Set this instead of `priceId` when the customer must choose between multiple priced options. */
 	variants?: ProductVariant[];
+	/**
+	 * Required text/select fields shown on the product card and collected before "Add to Cart"
+	 * — e.g. what name to embroider. Every field is required. The values are joined into the
+	 * cart item's `note` (src/lib/cart.ts) and end up on the Stripe payment as order metadata
+	 * (src/pages/api/create-checkout-session.ts) since Stripe Checkout has no per-line-item text
+	 * field when checking out against an existing Price rather than an ad-hoc price.
+	 */
+	personalization?: PersonalizationField[];
 	/** Custom order form path. Set this for made-to-order products. */
 	customOrderHref?: string;
 	/** Overrides the call-to-action label. Defaults per product kind. */
@@ -60,6 +83,18 @@ export const products: Product[] = [
 			"Soft white crew socks embroidered with a name and your choice of icon — personalize both at checkout.",
 		image: "/embroidered-socks.jpg",
 		priceId: "price_1UAqA5PwLggDTH961vScvdkb",
+		personalization: [
+			{ key: "name", label: "Name to Embroider", type: "text" },
+			{
+				key: "icon",
+				label: "Icon",
+				type: "select",
+				options: [
+					{ label: "Cheer Pom", value: "Cheer Pom" },
+					{ label: "Volleyball", value: "Volleyball" },
+				],
+			},
+		],
 	},
 	{
 		name: "Name Tags",
@@ -71,6 +106,15 @@ export const products: Product[] = [
 			{ label: "Name Only – Small", price: "$3", priceId: "price_1UC7rpPwLggDTH96n5QZ2AJk" },
 			{ label: "Name Only – Large", price: "$4", priceId: "price_1UFuUyPwLggDTH96t2jkmX85" },
 			{ label: "Name & Phone Number – Large", price: "$5", priceId: "price_1UC7s4PwLggDTH96t6sNhMU7" },
+		],
+		personalization: [
+			{ key: "name", label: "Name to Embroider", type: "text" },
+			{
+				key: "phone",
+				label: "Phone Number",
+				type: "text",
+				showForVariants: ["price_1UC7s4PwLggDTH96t6sNhMU7"],
+			},
 		],
 	},
 	{

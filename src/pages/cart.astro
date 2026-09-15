@@ -50,7 +50,7 @@ import { SITE_TITLE } from '../consts';
     <Footer />
 
     <script>
-      import { getCart, setQuantity, removeItem, parsePrice, CART_EVENT, type CartItem } from '../lib/cart';
+      import { getCart, setQuantity, removeItem, parsePrice, lineKey, CART_EVENT, type CartItem } from '../lib/cart';
 
       const emptyState = document.getElementById('cart-empty') as HTMLElement;
       const content = document.getElementById('cart-content') as HTMLElement;
@@ -60,9 +60,11 @@ import { SITE_TITLE } from '../consts';
       const checkoutBtn = document.getElementById('checkout-btn') as HTMLButtonElement;
 
       function renderItem(item: CartItem): HTMLLIElement {
+        const key = lineKey(item);
+
         const li = document.createElement('li');
         li.className = 'cart-item';
-        li.dataset.priceId = item.priceId;
+        li.dataset.lineKey = key;
 
         const img = document.createElement('img');
         img.src = item.image;
@@ -81,6 +83,13 @@ import { SITE_TITLE } from '../consts';
         price.textContent = item.price;
         details.appendChild(price);
 
+        if (item.note) {
+          const note = document.createElement('p');
+          note.className = 'cart-item-note';
+          note.textContent = item.note;
+          details.appendChild(note);
+        }
+
         const controls = document.createElement('div');
         controls.className = 'cart-item-controls';
 
@@ -89,7 +98,7 @@ import { SITE_TITLE } from '../consts';
         decrement.className = 'qty-btn';
         decrement.textContent = '−';
         decrement.setAttribute('aria-label', `Decrease quantity of ${item.name}`);
-        decrement.addEventListener('click', () => setQuantity(item.priceId, item.quantity - 1));
+        decrement.addEventListener('click', () => setQuantity(key, item.quantity - 1));
 
         const qty = document.createElement('span');
         qty.className = 'qty-value';
@@ -100,13 +109,13 @@ import { SITE_TITLE } from '../consts';
         increment.className = 'qty-btn';
         increment.textContent = '+';
         increment.setAttribute('aria-label', `Increase quantity of ${item.name}`);
-        increment.addEventListener('click', () => setQuantity(item.priceId, item.quantity + 1));
+        increment.addEventListener('click', () => setQuantity(key, item.quantity + 1));
 
         const remove = document.createElement('button');
         remove.type = 'button';
         remove.className = 'remove-btn';
         remove.textContent = 'Remove';
-        remove.addEventListener('click', () => removeItem(item.priceId));
+        remove.addEventListener('click', () => removeItem(key));
 
         controls.append(decrement, qty, increment, remove);
         details.appendChild(controls);
@@ -150,7 +159,11 @@ import { SITE_TITLE } from '../consts';
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              items: items.map((item) => ({ priceId: item.priceId, quantity: item.quantity })),
+              items: items.map((item) => ({
+                priceId: item.priceId,
+                quantity: item.quantity,
+                note: item.note,
+              })),
             }),
           });
 
@@ -224,6 +237,11 @@ import { SITE_TITLE } from '../consts';
         margin: 0;
         color: var(--rose);
         font-weight: 600;
+      }
+      .cart-item-note {
+        margin: 0;
+        color: var(--peak);
+        font-size: 0.85rem;
       }
       .cart-item-controls {
         display: flex;

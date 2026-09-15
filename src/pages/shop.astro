@@ -8,6 +8,12 @@ import { products } from '../data/products';
 
 const readyToOrder = products.filter((product) => product.priceId || product.variants);
 const customEmbroidery = products.filter((product) => product.customOrderHref);
+
+// Unique per-product id prefix for personalization field <label for>/id pairs, since several
+// product cards with their own fields render on this one page.
+function slugify(name: string): string {
+	return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 ---
 
 <!doctype html>
@@ -41,6 +47,40 @@ const customEmbroidery = products.filter((product) => product.customOrderHref);
               <div class="product-body">
                 <h3>{product.name}</h3>
                 <p class="description">{product.description}</p>
+                {product.personalization && (
+                  <div class="personalize-fields">
+                    {product.personalization.map((field) => (
+                      <div
+                        class="form-group personalize-field"
+                        data-personalize-field
+                        data-show-for-variants={field.showForVariants?.join(',') ?? ''}
+                      >
+                        <label for={`${slugify(product.name)}-${field.key}`}>
+                          {field.label} <span class="required">*</span>
+                        </label>
+                        {field.type === 'select' ? (
+                          <select
+                            id={`${slugify(product.name)}-${field.key}`}
+                            data-personalize-input={field.key}
+                            data-personalize-label={field.label}
+                          >
+                            <option value="" disabled selected>Choose…</option>
+                            {field.options?.map((opt) => <option value={opt.value}>{opt.label}</option>)}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            id={`${slugify(product.name)}-${field.key}`}
+                            data-personalize-input={field.key}
+                            data-personalize-label={field.label}
+                            maxlength="60"
+                            placeholder={field.label}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div class="product-footer">
                   {product.variants ? (
                     <select class="variant-select" data-variant-select aria-label={`Choose an option for ${product.name}`}>
@@ -107,16 +147,42 @@ const customEmbroidery = products.filter((product) => product.customOrderHref);
     <script>
       import { addItem } from '../lib/cart';
 
+      type PersonalizeInput = HTMLInputElement | HTMLSelectElement;
+
+      // Personalization fields (e.g. the Name Tags phone number) can be scoped to only one
+      // variant. Show/require each field based on whichever variant is currently selected —
+      // re-run on every variant change, and once up front for products with no variant picker.
+      function syncPersonalizeVisibility(card: Element) {
+        const variantSelect = card.querySelector<HTMLSelectElement>('[data-variant-select]');
+        const currentVariant = variantSelect?.value ?? '';
+
+        card.querySelectorAll<HTMLElement>('[data-personalize-field]').forEach((field) => {
+          const showFor = field.dataset.showForVariants;
+          const applies = !showFor || showFor.split(',').includes(currentVariant);
+          field.hidden = !applies;
+
+          const input = field.querySelector<PersonalizeInput>('[data-personalize-input]');
+          if (input) input.required = applies;
+        });
+      }
+
+      document.querySelectorAll('.product').forEach((card) => {
+        syncPersonalizeVisibility(card);
+        card
+          .querySelector<HTMLSelectElement>('[data-variant-select]')
+          ?.addEventListener('change', () => syncPersonalizeVisibility(card));
+      });
+
       const buttons = document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]');
 
       buttons.forEach((button) => {
         const defaultLabel = button.textContent ?? 'Add to Cart';
 
         button.addEventListener('click', () => {
+          const card = button.closest('.product');
           let { priceId, name, price, image } = button.dataset;
 
           if (button.dataset.variantProduct !== undefined) {
-            const card = button.closest('.product');
             const select = card?.querySelector<HTMLSelectElement>('[data-variant-select]');
             const option = select?.selectedOptions[0];
             if (!select || !option) {
@@ -128,6 +194,24 @@ const customEmbroidery = products.filter((product) => product.customOrderHref);
             name = name ? `${name} — ${option.dataset.label}` : option.dataset.label;
           }
 
+          // Collect + validate every currently-visible personalization field on this card.
+          // reportValidity() shows the browser's native "fill this in" bubble and focuses the
+          // field, so an empty required field stops the add right here.
+          const visibleFields = card
+            ? Array.from(card.querySelectorAll<HTMLElement>('[data-personalize-field]')).filter(
+                (field) => !field.hidden,
+              )
+            : [];
+          const noteParts: string[] = [];
+          for (const field of visibleFields) {
+            const input = field.querySelector<PersonalizeInput>('[data-personalize-input]');
+            if (!input) continue;
+            if (!input.reportValidity()) return;
+            const value = input.value.trim();
+            if (value) noteParts.push(`${input.dataset.personalizeLabel ?? ''}: ${value}`);
+          }
+          const note = noteParts.length > 0 ? noteParts.join('; ') : undefined;
+
           if (!priceId || !name || !price || !image) {
             // Missing data attributes mean the product is missing its Stripe Price ID
             // (see src/data/products.ts) — nothing to add, so leave the button alone.
@@ -135,7 +219,14 @@ const customEmbroidery = products.filter((product) => product.customOrderHref);
             return;
           }
 
-          addItem({ priceId, name, price, image });
+          addItem({ priceId, name, price, image, note });
+
+          // Clear personalization inputs so the next add-to-cart on this card starts blank
+          // instead of silently reusing the last customer's name.
+          for (const field of visibleFields) {
+            const input = field.querySelector<PersonalizeInput>('[data-personalize-input]');
+            if (input) input.value = '';
+          }
 
           // Brief confirmation in place of a toast component, matching the
           // relabel-on-submit pattern used on the custom order form.
@@ -203,6 +294,39 @@ const customEmbroidery = products.filter((product) => product.customOrderHref);
         color: var(--peak);
         font-size: 0.95rem;
         flex-grow: 1;
+      }
+      .personalize-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+      .personalize-field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+        font-family: "Manrope", sans-serif;
+      }
+      .personalize-field .required {
+        color: var(--rose);
+      }
+      .personalize-field input,
+      .personalize-field select {
+        width: 100%;
+        padding: 0.55rem 0.65rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-family: inherit;
+        font-size: 0.9rem;
+        background: var(--card);
+        color: var(--ink);
+      }
+      .personalize-field input:focus,
+      .personalize-field select:focus {
+        outline: 2px solid var(--violet);
+        outline-offset: 1px;
       }
       .product-footer {
         display: flex;
