@@ -13,12 +13,29 @@ export interface CartItem {
 	price: string;
 	image: string;
 	quantity: number;
+	/**
+	 * Personalization the customer entered (name to embroider, icon choice, etc.), e.g.
+	 * "Name: Emma; Icon: Volleyball". Shown on the cart page and sent to Stripe as order
+	 * metadata — see src/pages/api/create-checkout-session.ts.
+	 */
+	note?: string;
 }
 
 const STORAGE_KEY = "alpenglow_cart";
 
 /** Dispatched on `window` after any cart change, in this tab, so the header badge and cart page can react. */
 export const CART_EVENT = "cart:change";
+
+/**
+ * Identifies a cart line. Two lines with the same Price ID are the same product, but if they
+ * carry different personalization (different names on two name tags, say) they must stay as
+ * separate lines rather than being merged into one quantity — otherwise one customer's note
+ * would silently overwrite the other's. Lines with no personalization merge by Price ID alone,
+ * same as before this field existed.
+ */
+export function lineKey(item: Pick<CartItem, "priceId" | "note">): string {
+	return item.note ? `${item.priceId}::${item.note}` : item.priceId;
+}
 
 function readCart(): CartItem[] {
 	try {
@@ -53,7 +70,8 @@ export function cartCount(): number {
 
 export function addItem(item: Omit<CartItem, "quantity">, quantity = 1): void {
 	const items = readCart();
-	const existing = items.find((i) => i.priceId === item.priceId);
+	const key = lineKey(item);
+	const existing = items.find((i) => lineKey(i) === key);
 	if (existing) {
 		existing.quantity += quantity;
 	} else {
@@ -62,21 +80,23 @@ export function addItem(item: Omit<CartItem, "quantity">, quantity = 1): void {
 	writeCart(items);
 }
 
-export function setQuantity(priceId: string, quantity: number): void {
+/** `key` is a cart line's `lineKey(item)`, not a bare Price ID — see lineKey above. */
+export function setQuantity(key: string, quantity: number): void {
 	const items = readCart();
 	if (quantity <= 0) {
-		writeCart(items.filter((i) => i.priceId !== priceId));
+		writeCart(items.filter((i) => lineKey(i) !== key));
 		return;
 	}
-	const existing = items.find((i) => i.priceId === priceId);
+	const existing = items.find((i) => lineKey(i) === key);
 	if (existing) {
 		existing.quantity = quantity;
 		writeCart(items);
 	}
 }
 
-export function removeItem(priceId: string): void {
-	writeCart(readCart().filter((i) => i.priceId !== priceId));
+/** `key` is a cart line's `lineKey(item)`, not a bare Price ID — see lineKey above. */
+export function removeItem(key: string): void {
+	writeCart(readCart().filter((i) => lineKey(i) !== key));
 }
 
 export function clearCart(): void {

@@ -12,9 +12,10 @@ export const prerender = false;
 // checked out at the price and identity Stripe (via that Price object)
 // already has on file for it — the request never sets an amount.
 const knownPriceIds = new Set(
-	products.filter((product): product is typeof product & { priceId: string } => Boolean(product.priceId)).map(
-		(product) => product.priceId,
-	),
+	products.flatMap((product) => [
+		...(product.priceId ? [product.priceId] : []),
+		...(product.variants?.map((variant) => variant.priceId) ?? []),
+	]),
 );
 
 // Mirrors the per-item cap Stripe itself applies to Payment Links; keeps a
@@ -22,9 +23,18 @@ const knownPriceIds = new Set(
 // absurd before it's rejected.
 const MAX_QUANTITY_PER_ITEM = 20;
 
+// Stripe's `line_items` don't carry custom text when using an existing Price
+// (only `price_data` line items can, and switching to that would mean
+// re-deriving the amount ourselves instead of trusting the Price object).
+// So personalization notes are collected per line but sent up to Stripe as
+// one combined string on the session/PaymentIntent instead of per-item.
+const NOTE_MAX_LENGTH = 200;
+const DESCRIPTION_MAX_LENGTH = 500;
+
 interface CartLineInput {
 	priceId?: unknown;
 	quantity?: unknown;
+	note?: unknown;
 }
 
 function jsonResponse(body: unknown, status: number): Response {
@@ -32,6 +42,26 @@ function jsonResponse(body: unknown, status: number): Response {
 		status,
 		headers: { 'Content-Type': 'application/json' },
 	});
+}
+
+/** Human-readable label for a line item, e.g. "Name Tags (Name & Phone Number – Large)". */
+function productLabelForPriceId(priceId: string): string {
+	for (const product of products) {
+		if (product.priceId === priceId) return product.name;
+		const variant = product.variants?.find((v) => v.priceId === priceId);
+		if (variant) return `${product.name} (${variant.label})`;
+	}
+	return priceId;
+}
+
+// The note is free text a customer typed into a shop-page field, not
+// something with a fixed shape — clean it up before it goes into a Stripe
+// API call (control characters can't ride along in a string field anyway,
+// and stripping them defensively costs nothing).
+function sanitizeNote(value: unknown): string | undefined {
+	if (typeof value !== 'string') return undefined;
+	const cleaned = value.replace(/[\x00-\x1F\x7F]/g, ' ').replace(/\s+/g, ' ').trim();
+	return cleaned ? cleaned.slice(0, NOTE_MAX_LENGTH) : undefined;
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -56,6 +86,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	const lineItems: { price: string; quantity: number }[] = [];
+	const orderNotes: string[] = [];
 	for (const item of rawItems) {
 		if (typeof item.priceId !== 'string' || !knownPriceIds.has(item.priceId)) {
 			return jsonResponse({ error: 'Cart contains an unrecognized item.' }, 400);
@@ -65,7 +96,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			return jsonResponse({ error: 'Invalid item quantity.' }, 400);
 		}
 		lineItems.push({ price: item.priceId, quantity });
+
+		const note = sanitizeNote(item.note);
+		if (note) {
+			orderNotes.push(`${productLabelForPriceId(item.priceId)}: ${note}`);
+		}
 	}
+	const personalization = orderNotes.length > 0 ? orderNotes.join(' | ').slice(0, DESCRIPTION_MAX_LENGTH) : undefined;
 
 	const stripe = new Stripe(secretKey, {
 		// stripe-node defaults to Node's `https` module for requests, which
@@ -83,6 +120,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			line_items: lineItems,
 			success_url: `${origin}/cart/success`,
 			cancel_url: `${origin}/cart`,
+			// Personalization notes aren't shown to the customer here — they typed them on the
+			// shop page already. This is purely so the order is fulfillable: it shows up on the
+			// payment in the Stripe Dashboard (and in the "successful payment" notification, if
+			// that's mapped in) instead of the order having no record of what to embroider.
+			...(personalization && {
+				payment_intent_data: { description: personalization },
+				metadata: { personalization },
+			}),
 		});
 
 		if (!session.url) {
