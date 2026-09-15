@@ -12,9 +12,10 @@ export const prerender = false;
 // checked out at the price and identity Stripe (via that Price object)
 // already has on file for it — the request never sets an amount.
 const knownPriceIds = new Set(
-	products.filter((product): product is typeof product & { priceId: string } => Boolean(product.priceId)).map(
-		(product) => product.priceId,
-	),
+	products.flatMap((product) => [
+		...(product.priceId ? [product.priceId] : []),
+		...(product.variants?.map((variant) => variant.priceId) ?? []),
+	]),
 );
 
 // Mirrors the per-item cap Stripe itself applies to Payment Links; keeps a

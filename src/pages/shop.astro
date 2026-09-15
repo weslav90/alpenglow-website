@@ -6,8 +6,8 @@ import StitchDivider from '../components/StitchDivider.astro';
 import { SITE_TITLE } from '../consts';
 import { products } from '../data/products';
 
-const mainProducts = products.filter((product) => product.category !== 'halloween');
-const halloweenProducts = products.filter((product) => product.category === 'halloween');
+const readyToOrder = products.filter((product) => product.priceId || product.variants);
+const customEmbroidery = products.filter((product) => product.customOrderHref);
 ---
 
 <!doctype html>
@@ -35,34 +35,36 @@ const halloweenProducts = products.filter((product) => product.category === 'hal
 
       <section class="section">
         <div class="grid">
-          {mainProducts.map((product) => (
+          {readyToOrder.map((product) => (
             <div class="product">
               <img src={product.image} alt={product.name} />
               <div class="product-body">
                 <h3>{product.name}</h3>
                 <p class="description">{product.description}</p>
-                {product.customOrderHref && (
-                  <p class="quote-note">Quoted before you pay — no charge until you approve.</p>
-                )}
                 <div class="product-footer">
-                  <span class="price">{product.price}</span>
-                  {product.priceId ? (
-                    <button
-                      type="button"
-                      class="btn btn-primary buy-btn add-to-cart-btn"
-                      data-add-to-cart
-                      data-price-id={product.priceId}
-                      data-name={product.name}
-                      data-price={product.price}
-                      data-image={product.image}
-                    >
-                      {product.ctaLabel ?? 'Add to Cart'}
-                    </button>
+                  {product.variants ? (
+                    <select class="variant-select" data-variant-select aria-label={`Choose an option for ${product.name}`}>
+                      {product.variants.map((variant) => (
+                        <option value={variant.priceId} data-price={variant.price} data-label={variant.label}>
+                          {variant.label} — {variant.price}
+                        </option>
+                      ))}
+                    </select>
                   ) : (
-                    <a href={product.customOrderHref} class="btn btn-primary buy-btn">
-                      {product.ctaLabel ?? 'Design Yours'}
-                    </a>
+                    <span class="price">{product.price}</span>
                   )}
+                  <button
+                    type="button"
+                    class="btn btn-primary buy-btn add-to-cart-btn"
+                    data-add-to-cart
+                    data-price-id={product.priceId}
+                    data-name={product.name}
+                    data-price={product.price}
+                    data-image={product.image}
+                    data-variant-product={product.variants ? '' : undefined}
+                  >
+                    {product.ctaLabel ?? 'Add to Cart'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -70,45 +72,35 @@ const halloweenProducts = products.filter((product) => product.category === 'hal
         </div>
       </section>
 
-      {halloweenProducts.length > 0 && (
-        <>
-          <StitchDivider />
+      <StitchDivider />
 
-          <section class="section halloween-section">
-            <span class="eyebrow">Limited Time</span>
-            <h2>🎃 Halloween Collection</h2>
-            <p class="lede">
-              Personalized trick-or-treat baskets, embroidered to order — get yours before the
-              baskets start filling up.
-            </p>
-            <div class="grid">
-              {halloweenProducts.map((product) => (
-                <div class="product">
-                  <img src={product.image} alt={product.name} />
-                  <div class="product-body">
-                    <h3>{product.name}</h3>
-                    <p class="description">{product.description}</p>
-                    <div class="product-footer">
-                      <span class="price">{product.price}</span>
-                      <button
-                        type="button"
-                        class="btn btn-primary buy-btn add-to-cart-btn"
-                        data-add-to-cart
-                        data-price-id={product.priceId}
-                        data-name={product.name}
-                        data-price={product.price}
-                        data-image={product.image}
-                      >
-                        {product.ctaLabel ?? 'Add to Cart'}
-                      </button>
-                    </div>
-                  </div>
+      <section class="section custom-section">
+        <span class="eyebrow">Made to Order</span>
+        <h2>Custom Embroidery</h2>
+        <p class="lede">
+          Have your own item to embroider, or want something stitched from scratch? Choose your
+          font and thread color, tell us what you'd like, and we'll send you a quote before
+          anything is charged.
+        </p>
+        <div class="grid">
+          {customEmbroidery.map((product) => (
+            <div class="product">
+              <img src={product.image} alt={product.name} />
+              <div class="product-body">
+                <h3>{product.name}</h3>
+                <p class="description">{product.description}</p>
+                <p class="quote-note">Quoted before you pay — no charge until you approve.</p>
+                <div class="product-footer">
+                  <span class="price">{product.price}</span>
+                  <a href={product.customOrderHref} class="btn btn-primary buy-btn">
+                    {product.ctaLabel ?? 'Design Yours'}
+                  </a>
                 </div>
-              ))}
+              </div>
             </div>
-          </section>
-        </>
-      )}
+          ))}
+        </div>
+      </section>
     </main>
     <Footer />
 
@@ -121,7 +113,21 @@ const halloweenProducts = products.filter((product) => product.category === 'hal
         const defaultLabel = button.textContent ?? 'Add to Cart';
 
         button.addEventListener('click', () => {
-          const { priceId, name, price, image } = button.dataset;
+          let { priceId, name, price, image } = button.dataset;
+
+          if (button.dataset.variantProduct !== undefined) {
+            const card = button.closest('.product');
+            const select = card?.querySelector<HTMLSelectElement>('[data-variant-select]');
+            const option = select?.selectedOptions[0];
+            if (!select || !option) {
+              console.error('Variant product is missing its option picker', button.dataset);
+              return;
+            }
+            priceId = select.value;
+            price = option.dataset.price;
+            name = name ? `${name} — ${option.dataset.label}` : option.dataset.label;
+          }
+
           if (!priceId || !name || !price || !image) {
             // Missing data attributes mean the product is missing its Stripe Price ID
             // (see src/data/products.ts) — nothing to add, so leave the button alone.
@@ -152,15 +158,15 @@ const halloweenProducts = products.filter((product) => product.category === 'hal
         max-width: 600px;
         margin: 0 auto;
       }
-      .halloween-section {
+      .custom-section {
         text-align: center;
       }
-      .halloween-section .lede {
+      .custom-section .lede {
         color: var(--peak);
         max-width: 600px;
         margin: 0 auto;
       }
-      .halloween-section .grid {
+      .custom-section .grid {
         text-align: left;
       }
       .grid {
@@ -210,6 +216,21 @@ const halloweenProducts = products.filter((product) => product.category === 'hal
         font-size: 1.35rem;
         font-weight: 600;
         color: var(--rose);
+      }
+      .variant-select {
+        flex: 1;
+        min-width: 0;
+        padding: 0.5rem 0.6rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-family: "Manrope", sans-serif;
+        font-size: 0.85rem;
+        background: var(--card);
+        color: var(--ink);
+      }
+      .variant-select:focus {
+        outline: 2px solid var(--violet);
+        outline-offset: 1px;
       }
       .buy-btn {
         padding: 0.6em 1.4em;

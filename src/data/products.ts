@@ -1,33 +1,47 @@
-// Products shown on the Shop page.
+// Products shown on the Shop page (split there into "Ready to Order" and
+// "Custom Embroidery" sections, based on which fields below are set).
 //
 // There are two kinds:
-//   * Buy-it-now  — set `priceId` to a Stripe Price ID. The customer adds it
-//     to a cart (src/lib/cart.ts) and can check out several products at once
-//     through one Stripe Checkout Session (src/pages/api/create-checkout-session.ts).
+//   * Buy-it-now  — set `priceId` to a single Stripe Price ID, or `variants`
+//     when the customer must choose between a few priced options (e.g. size).
+//     The customer adds it to a cart (src/lib/cart.ts) and can check out
+//     several products at once through one Stripe Checkout Session
+//     (src/pages/api/create-checkout-session.ts).
 //   * Made-to-order — set `customOrderHref` to a custom order form instead.
 //     These are quoted and invoiced by hand before any stitching starts, so
 //     they deliberately do NOT go straight to Stripe checkout.
 //
-// To add a buy-it-now product: create the product and its Price in the
-// Stripe Dashboard (Product catalog -> Add product), then add an entry here
-// with that Price's ID (starts with "price_") as `priceId`. The checkout
-// endpoint only accepts price IDs that appear in this file, so a product
-// added here without a real Stripe Price ID will fail at checkout, not at
-// build time.
+// To add a single-price buy-it-now product: create the product and its
+// Price in the Stripe Dashboard (Product catalog -> Add product), then add
+// an entry here with that Price's ID (starts with "price_") as `priceId`.
+// For a product with multiple priced options, create one Price per option
+// and list them under `variants` instead (see "Name Tags" below). Either
+// way, the checkout endpoint only accepts price IDs that appear in this
+// file, so a product added here without a real Stripe Price ID will fail at
+// checkout, not at build time.
+
+export interface ProductVariant {
+	/** Shown in the option picker, e.g. "Name Only – Small". */
+	label: string;
+	/** Display string, e.g. "$3". */
+	price: string;
+	/** Stripe Price ID (starts with "price_") for this specific variant. */
+	priceId: string;
+}
 
 export interface Product {
 	name: string;
-	price: string; // display string, e.g. "$35"
+	price: string; // display string, e.g. "$35", or a range like "$3–$5" for variant products
 	description: string;
 	image: string; // path under /public
-	/** Stripe Price ID (starts with "price_"). Set this for buy-it-now products. */
+	/** Stripe Price ID (starts with "price_"). Set this for a single-price buy-it-now product. */
 	priceId?: string;
+	/** Set this instead of `priceId` when the customer must choose between multiple priced options. */
+	variants?: ProductVariant[];
 	/** Custom order form path. Set this for made-to-order products. */
 	customOrderHref?: string;
 	/** Overrides the call-to-action label. Defaults per product kind. */
 	ctaLabel?: string;
-	/** Set to "halloween" to show this product in the seasonal Halloween section instead of the main grid. */
-	category?: "halloween";
 }
 
 export const products: Product[] = [
@@ -46,6 +60,18 @@ export const products: Product[] = [
 			"Soft white crew socks embroidered with a name and your choice of icon — personalize both at checkout.",
 		image: "/embroidered-socks.jpg",
 		priceId: "price_1UAqA5PwLggDTH961vScvdkb",
+	},
+	{
+		name: "Name Tags",
+		price: "$3–$5",
+		description:
+			"Iron-on name tags for backpacks, lunch boxes, coats, and gear. Choose name only, or add a phone number for extra peace of mind.",
+		image: "/nametags.jpg",
+		variants: [
+			{ label: "Name Only – Small", price: "$3", priceId: "price_1UC7rpPwLggDTH96n5QZ2AJk" },
+			{ label: "Name Only – Large", price: "$4", priceId: "price_1UFuUyPwLggDTH96t2jkmX85" },
+			{ label: "Name & Phone Number – Large", price: "$5", priceId: "price_1UC7s4PwLggDTH96t6sNhMU7" },
+		],
 	},
 	{
 		name: "Custom Embroidered Baseball Cap",
@@ -75,29 +101,12 @@ export const products: Product[] = [
 		ctaLabel: "Design Yours",
 	},
 	{
-		name: "Halloween Basket with Pumpkin and Name",
-		price: "$25",
+		name: "Custom Embroidered Shirts, Jackets & More",
+		price: "Custom quote",
 		description:
-			"A gingham trick-or-treat basket with an appliqué pumpkin, embroidered with the name of your choice.",
-		image: "/halloween-basket-pumpkin-name.jpg",
-		priceId: "price_1UAsGpPwLggDTH96Zh0OvoXV",
-		category: "halloween",
-	},
-	{
-		name: "Halloween Basket with Jack-o'-Lantern",
-		price: "$15",
-		description: "A gingham trick-or-treat basket embroidered with a classic jack-o'-lantern face.",
-		image: "/halloween-basket-jack-o-lantern.jpg",
-		priceId: "price_1UAsFNPwLggDTH96gChCOQ6P",
-		category: "halloween",
-	},
-	{
-		name: "Halloween Basket with Name",
-		price: "$20",
-		description:
-			"A black-and-white gingham trick-or-treat basket embroidered with the name of your choice.",
-		image: "/halloween-basket-monogram.jpg",
-		priceId: "price_1UAsEbPwLggDTH96ov8my8gK",
-		category: "halloween",
+			"Send us your own shirt, jacket, or other item to embroider — or tell us what you'd like and we can help source it too. Choose your font and thread color, tell us what you'd like stitched, and we'll send you a quote before we start.",
+		image: "/gallery/jacket-navy.jpg",
+		customOrderHref: "/custom-apparel",
+		ctaLabel: "Design Yours",
 	},
 ];
