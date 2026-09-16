@@ -54,19 +54,28 @@ function slugify(name: string): string {
                         class="form-group personalize-field"
                         data-personalize-field
                         data-show-for-variants={field.showForVariants?.join(',') ?? ''}
+                        data-show-when-key={field.showWhen?.key ?? ''}
+                        data-show-when-equals={field.showWhen?.equals ?? ''}
                       >
                         <label for={`${slugify(product.name)}-${field.key}`}>
                           {field.label} <span class="required">*</span>
                         </label>
                         {field.type === 'select' ? (
-                          <select
-                            id={`${slugify(product.name)}-${field.key}`}
-                            data-personalize-input={field.key}
-                            data-personalize-label={field.label}
-                          >
-                            <option value="" disabled selected>Choose…</option>
-                            {field.options?.map((opt) => <option value={opt.value}>{opt.label}</option>)}
-                          </select>
+                          <div class="personalize-color-row">
+                            <select
+                              id={`${slugify(product.name)}-${field.key}`}
+                              data-personalize-input={field.key}
+                              data-personalize-label={field.label}
+                            >
+                              <option value="" disabled selected>Choose…</option>
+                              {field.options?.map((opt) => (
+                                <option value={opt.value} data-hex={opt.hex}>{opt.label}</option>
+                              ))}
+                            </select>
+                            {field.options?.some((opt) => opt.hex) && (
+                              <span class="personalize-swatch" data-personalize-swatch aria-hidden="true"></span>
+                            )}
+                          </div>
                         ) : (
                           <input
                             type="text"
@@ -149,28 +158,55 @@ function slugify(name: string): string {
 
       type PersonalizeInput = HTMLInputElement | HTMLSelectElement;
 
-      // Personalization fields (e.g. the Name Tags phone number) can be scoped to only one
-      // variant. Show/require each field based on whichever variant is currently selected —
-      // re-run on every variant change, and once up front for products with no variant picker.
-      function syncPersonalizeVisibility(card: Element) {
+      // Updates a select's color swatch (Name Tags' Border Color, etc.) to the hex on its
+      // currently selected option, or back to the CSS-default checkerboard placeholder.
+      function updateSwatch(select: HTMLSelectElement) {
+        const swatch = select.closest('.personalize-color-row')?.querySelector<HTMLElement>('[data-personalize-swatch]');
+        if (!swatch) return;
+        swatch.style.background = select.selectedOptions[0]?.dataset.hex || '';
+      }
+
+      // Personalization fields can be scoped to one variant (the Name Tags phone number) or to
+      // a sibling field's value (the socks' custom-icon description only once "Custom" is
+      // picked). Re-check every field's visibility/required-ness and refresh color swatches
+      // whenever anything on the card changes, and once up front on load.
+      function syncPersonalizeCard(card: Element) {
         const variantSelect = card.querySelector<HTMLSelectElement>('[data-variant-select]');
         const currentVariant = variantSelect?.value ?? '';
 
         card.querySelectorAll<HTMLElement>('[data-personalize-field]').forEach((field) => {
           const showFor = field.dataset.showForVariants;
-          const applies = !showFor || showFor.split(',').includes(currentVariant);
-          field.hidden = !applies;
+          let applies = !showFor || showFor.split(',').includes(currentVariant);
 
+          const showWhenKey = field.dataset.showWhenKey;
+          if (applies && showWhenKey) {
+            const sibling = card.querySelector<PersonalizeInput>(
+              `[data-personalize-input="${showWhenKey}"]`,
+            );
+            applies = sibling?.value === field.dataset.showWhenEquals;
+          }
+
+          field.hidden = !applies;
           const input = field.querySelector<PersonalizeInput>('[data-personalize-input]');
           if (input) input.required = applies;
         });
+
+        card
+          .querySelectorAll<HTMLSelectElement>('select[data-personalize-input]')
+          .forEach(updateSwatch);
       }
 
       document.querySelectorAll('.product').forEach((card) => {
-        syncPersonalizeVisibility(card);
-        card
-          .querySelector<HTMLSelectElement>('[data-variant-select]')
-          ?.addEventListener('change', () => syncPersonalizeVisibility(card));
+        syncPersonalizeCard(card);
+        // Delegated so it covers the variant select and every personalization field (including
+        // ones that gate each other, like the socks' Icon -> custom-icon-description field) with
+        // one listener per card instead of one per input.
+        card.addEventListener('change', (event) => {
+          const target = event.target as HTMLElement;
+          if (target.matches('[data-variant-select], [data-personalize-input]')) {
+            syncPersonalizeCard(card);
+          }
+        });
       });
 
       const buttons = document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]');
@@ -222,11 +258,14 @@ function slugify(name: string): string {
           addItem({ priceId, name, price, image, note });
 
           // Clear personalization inputs so the next add-to-cart on this card starts blank
-          // instead of silently reusing the last customer's name.
+          // instead of silently reusing the last customer's name, then re-sync visibility and
+          // swatches — clearing the Icon select back to blank should re-hide the custom-icon
+          // field, and clearing Border Color should reset its swatch to the placeholder.
           for (const field of visibleFields) {
             const input = field.querySelector<PersonalizeInput>('[data-personalize-input]');
             if (input) input.value = '';
           }
+          if (card) syncPersonalizeCard(card);
 
           // Brief confirmation in place of a toast component, matching the
           // relabel-on-submit pattern used on the custom order form.
@@ -327,6 +366,28 @@ function slugify(name: string): string {
       .personalize-field select:focus {
         outline: 2px solid var(--violet);
         outline-offset: 1px;
+      }
+      .personalize-color-row {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .personalize-color-row select {
+        flex: 1;
+      }
+      .personalize-swatch {
+        flex-shrink: 0;
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: repeating-linear-gradient(
+          45deg,
+          #f0f0f0,
+          #f0f0f0 4px,
+          #ffffff 4px,
+          #ffffff 8px
+        );
       }
       .product-footer {
         display: flex;

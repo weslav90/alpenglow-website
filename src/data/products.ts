@@ -20,6 +20,18 @@
 // file, so a product added here without a real Stripe Price ID will fail at
 // checkout, not at build time.
 
+import { THREAD_COLORS } from "./threadColors";
+
+// Name Tag border colors are a subset of the same thread color chart used for custom orders
+// (see FontThreadFields.astro), not a separate palette — pulled by code so the hex/name stay in
+// sync with that chart instead of being retyped here.
+const NAME_TAG_BORDER_CODES = ["405", "900"];
+const nameTagBorderOptions = NAME_TAG_BORDER_CODES.map((code) => {
+	const color = THREAD_COLORS.find((c) => c.code === code);
+	if (!color) throw new Error(`Thread color code ${code} not found in THREAD_COLORS`);
+	return { label: `${color.code} — ${color.name}`, value: `${color.code} ${color.name}`, hex: color.hex };
+});
+
 export interface ProductVariant {
 	/** Shown in the option picker, e.g. "Name Only – Small". */
 	label: string;
@@ -34,14 +46,25 @@ export interface PersonalizationField {
 	key: string;
 	label: string;
 	type: "text" | "select";
-	/** Required when type is "select". */
-	options?: { label: string; value: string }[];
+	/**
+	 * Required when type is "select". `hex`, if set on every option, renders a small color
+	 * swatch next to the dropdown that updates as the customer picks an option (see the
+	 * thread-color picker in FontThreadFields.astro, which this mirrors).
+	 */
+	options?: { label: string; value: string; hex?: string }[];
 	/**
 	 * Only required (and shown) when the currently selected variant's Price ID is in this list —
 	 * e.g. the phone number field on Name Tags only applies to the "Name & Phone Number" variant.
 	 * Omit to always show the field, including on products with no variants at all.
 	 */
 	showForVariants?: string[];
+	/**
+	 * Only required (and shown) when another personalization field on this product — matched by
+	 * `key` — currently has the value `equals`. E.g. the socks' "describe your icon" field only
+	 * applies once "Custom" is chosen in the Icon dropdown. Evaluated in addition to
+	 * `showForVariants` if both are set.
+	 */
+	showWhen?: { key: string; equals: string };
 }
 
 export interface Product {
@@ -92,7 +115,14 @@ export const products: Product[] = [
 				options: [
 					{ label: "Cheer Pom", value: "Cheer Pom" },
 					{ label: "Volleyball", value: "Volleyball" },
+					{ label: "Custom", value: "Custom" },
 				],
+			},
+			{
+				key: "icon_custom",
+				label: "Describe Your Custom Icon",
+				type: "text",
+				showWhen: { key: "icon", equals: "Custom" },
 			},
 		],
 	},
@@ -115,7 +145,21 @@ export const products: Product[] = [
 				type: "text",
 				showForVariants: ["price_1UC7s4PwLggDTH96t6sNhMU7"],
 			},
+			{
+				key: "border_color",
+				label: "Border Color",
+				type: "select",
+				options: nameTagBorderOptions,
+			},
 		],
+	},
+	{
+		name: "Girl's Bow",
+		price: "$5",
+		description: "A yellow cheer bow with the Queen Bee icon on one tail and the name of your choice on the other.",
+		image: "/girls-bow.jpg",
+		priceId: "price_1UGHbGPwLggDTH96gOtG5K9b",
+		personalization: [{ key: "name", label: "Name to Embroider", type: "text" }],
 	},
 	{
 		name: "Custom Embroidered Baseball Cap",
