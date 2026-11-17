@@ -130,11 +130,10 @@ export const products: Product[] = [
 		image: "/christmas-stocking.svg",
 		section: "christmas",
 		variants: [
-			// TODO: replace both placeholder IDs with the real Stripe Price IDs for the
-			// "Custom Embroidered Christmas Stockings" product ($10 and $16, one-time).
-			// Checkout rejects these placeholders until then.
-			{ label: "Set of 2", price: "$10", priceId: "price_REPLACE_STOCKINGS_SET_OF_2" },
-			{ label: "Set of 4", price: "$16", priceId: "price_REPLACE_STOCKINGS_SET_OF_4" },
+			// Both Prices belong to the Stripe product "Custom Embroidered Christmas Stockings"
+			// (prod_VdwAtPabIRNyAG). One unit = one set.
+			{ label: "Set of 2", price: "$10", priceId: "price_1UceHvPwLggDTH965oOgQDLF" },
+			{ label: "Set of 4", price: "$16", priceId: "price_1UceHvPwLggDTH965KpdNd0K" },
 		],
 		personalization: [
 			{ key: "font", label: "Font Style", type: "select", options: christmasFontOptions },
