@@ -6,7 +6,16 @@ import StitchDivider from '../components/StitchDivider.astro';
 import { SITE_TITLE } from '../consts';
 import { products } from '../data/products';
 
-const readyToOrder = products.filter((product) => product.priceId || product.variants);
+const buyItNow = products.filter((product) => product.priceId || product.variants);
+const christmas = buyItNow.filter((product) => product.section === 'christmas');
+const readyToOrder = buyItNow.filter((product) => !product.section);
+
+// Buy-it-now cards are rendered once, below, for each of these groups, so the seasonal block
+// and the general grid share the same card markup, script, and styles.
+const buyItNowGroups = [
+  { id: 'christmas', products: christmas },
+  { id: 'ready-to-order', products: readyToOrder },
+].filter((group) => group.products.length > 0);
 const customEmbroidery = products.filter((product) => product.customOrderHref);
 
 // Unique per-product id prefix for personalization field <label for>/id pairs, since several
@@ -39,9 +48,20 @@ function slugify(name: string): string {
 
       <StitchDivider />
 
-      <section class="section">
+      {buyItNowGroups.map((group) => (
+      <Fragment>
+      <section class={`section ${group.id === 'christmas' ? 'christmas-section' : ''}`} id={group.id}>
+        {group.id === 'christmas' && (
+          <div class="christmas-intro">
+            <span class="eyebrow">Christmas</span>
+            <h2>Stockings with their names on them</h2>
+            <p class="lede">
+              Custom name embroidery on your own stockings, in a font made for the season.
+            </p>
+          </div>
+        )}
         <div class="grid">
-          {readyToOrder.map((product) => (
+          {group.products.map((product) => (
             <div class="product">
               <img src={product.image} alt={product.name} />
               <div class="product-body">
@@ -69,22 +89,36 @@ function slugify(name: string): string {
                             >
                               <option value="" disabled selected>Choose…</option>
                               {field.options?.map((opt) => (
-                                <option value={opt.value} data-hex={opt.hex}>{opt.label}</option>
+                                <option value={opt.value} data-hex={opt.hex} data-img={opt.image}>{opt.label}</option>
                               ))}
                             </select>
                             {field.options?.some((opt) => opt.hex) && (
                               <span class="personalize-swatch" data-personalize-swatch aria-hidden="true"></span>
                             )}
                           </div>
+                        ) : field.type === 'textarea' ? (
+                          <textarea
+                            id={`${slugify(product.name)}-${field.key}`}
+                            data-personalize-input={field.key}
+                            data-personalize-label={field.label}
+                            rows="4"
+                            maxlength={field.maxLength ?? 60}
+                            placeholder={field.placeholder ?? field.label}
+                          ></textarea>
                         ) : (
                           <input
                             type="text"
                             id={`${slugify(product.name)}-${field.key}`}
                             data-personalize-input={field.key}
                             data-personalize-label={field.label}
-                            maxlength="60"
-                            placeholder={field.label}
+                            maxlength={field.maxLength ?? 60}
+                            placeholder={field.placeholder ?? field.label}
                           />
+                        )}
+                        {field.type === 'select' && field.options?.some((opt) => opt.image) && (
+                          <span class="personalize-font-preview" data-personalize-preview hidden>
+                            <img alt="" />
+                          </span>
                         )}
                       </div>
                     ))}
@@ -122,6 +156,8 @@ function slugify(name: string): string {
       </section>
 
       <StitchDivider />
+      </Fragment>
+      ))}
 
       <section class="section custom-section">
         <span class="eyebrow">Made to Order</span>
@@ -156,7 +192,7 @@ function slugify(name: string): string {
     <script>
       import { addItem } from '../lib/cart';
 
-      type PersonalizeInput = HTMLInputElement | HTMLSelectElement;
+      type PersonalizeInput = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
       // Updates a select's color swatch (Name Tags' Border Color, etc.) to the hex on its
       // currently selected option, or back to the CSS-default checkerboard placeholder.
@@ -164,6 +200,28 @@ function slugify(name: string): string {
         const swatch = select.closest('.personalize-color-row')?.querySelector<HTMLElement>('[data-personalize-swatch]');
         if (!swatch) return;
         swatch.style.background = select.selectedOptions[0]?.dataset.hex || '';
+      }
+
+      // Same idea for a select whose options carry sample images (the Christmas stockings'
+      // Font Style): show the selected font's sample under the dropdown, hidden until a font
+      // is picked.
+      function updatePreview(select: HTMLSelectElement) {
+        const preview = select
+          .closest('[data-personalize-field]')
+          ?.querySelector<HTMLElement>('[data-personalize-preview]');
+        const img = preview?.querySelector('img');
+        if (!preview || !img) return;
+        const option = select.selectedOptions[0];
+        const src = option?.dataset.img;
+        if (src) {
+          img.src = src;
+          img.alt = `Sample of the ${option.textContent?.trim()} font`;
+          preview.hidden = false;
+        } else {
+          img.removeAttribute('src');
+          img.alt = '';
+          preview.hidden = true;
+        }
       }
 
       // Personalization fields can be scoped to one variant (the Name Tags phone number) or to
@@ -193,7 +251,10 @@ function slugify(name: string): string {
 
         card
           .querySelectorAll<HTMLSelectElement>('select[data-personalize-input]')
-          .forEach(updateSwatch);
+          .forEach((select) => {
+            updateSwatch(select);
+            updatePreview(select);
+          });
       }
 
       document.querySelectorAll('.product').forEach((card) => {
@@ -243,7 +304,13 @@ function slugify(name: string): string {
             const input = field.querySelector<PersonalizeInput>('[data-personalize-input]');
             if (!input) continue;
             if (!input.reportValidity()) return;
-            const value = input.value.trim();
+            // A textarea can hold line breaks (one name per line, say). The checkout endpoint
+            // collapses them to plain spaces, which would run the names together, so turn each
+            // break into " / " here to keep the lines distinguishable on the order.
+            const value = input.value
+              .trim()
+              .replace(/\s*[\r\n]+\s*/g, ' / ')
+              .replace(/\s+/g, ' ');
             if (value) noteParts.push(`${input.dataset.personalizeLabel ?? ''}: ${value}`);
           }
           const note = noteParts.length > 0 ? noteParts.join('; ') : undefined;
@@ -351,6 +418,7 @@ function slugify(name: string): string {
         color: var(--rose);
       }
       .personalize-field input,
+      .personalize-field textarea,
       .personalize-field select {
         width: 100%;
         padding: 0.55rem 0.65rem;
@@ -362,7 +430,50 @@ function slugify(name: string): string {
         background: var(--card);
         color: var(--ink);
       }
+      .personalize-field textarea {
+        resize: vertical;
+        min-height: 5.5rem;
+        display: block;
+      }
+      .personalize-font-preview {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 4rem;
+        margin-top: 0.5rem;
+        padding: 0.4rem 0.6rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #ffffff;
+        box-sizing: border-box;
+      }
+      .personalize-font-preview[hidden] {
+        display: none;
+      }
+      /* Overrides the card photo rule (.product img) for the small font sample. */
+      .product .personalize-font-preview img {
+        width: auto;
+        max-width: 100%;
+        max-height: 100%;
+        aspect-ratio: auto;
+        object-fit: contain;
+      }
+      .christmas-intro {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .christmas-intro .lede {
+        color: var(--peak);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      /* A single card shouldn't stretch across the whole row. */
+      .christmas-section .grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 420px));
+        justify-content: center;
+      }
       .personalize-field input:focus,
+      .personalize-field textarea:focus,
       .personalize-field select:focus {
         outline: 2px solid var(--violet);
         outline-offset: 1px;

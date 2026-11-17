@@ -107,3 +107,34 @@ export const FONT_CATEGORIES: FontCategory[] = [
 		twoColorFonts: ["Twilight Wreath", "Twilight Seal"],
 	},
 ];
+
+// Seasonal fonts offered only on Christmas products (see the "christmas" section in
+// src/data/products.ts) — deliberately kept out of FONT_CATEGORIES so they don't show up in
+// the year-round Font Style picker or the home page's Browse Our Fonts gallery.
+//
+// Source: the "20 Christmas Fonts Bundle" folders guide (Nov 2026). Sample images live in
+// /public/fonts-guide/christmas. The first ten show the font's own name stitched in that font;
+// the guide prints the last ten names in a plain label font, so their samples show the first
+// row of the alphabet instead.
+export const CHRISTMAS_FONTS: FontOption[] = [
+	{ name: "Fircharm", image: "/fonts-guide/christmas/fircharm.webp" },
+	{ name: "Joycrest", image: "/fonts-guide/christmas/joycrest.webp" },
+	{ name: "Tinsela", image: "/fonts-guide/christmas/tinsela.webp" },
+	{ name: "Everpine", image: "/fonts-guide/christmas/everpine.webp" },
+	{ name: "Glowbell", image: "/fonts-guide/christmas/glowbell.webp" },
+	{ name: "Starwish", image: "/fonts-guide/christmas/starwish.webp" },
+	{ name: "Mistlien", image: "/fonts-guide/christmas/mistlien.webp" },
+	{ name: "Frostune", image: "/fonts-guide/christmas/frostune.webp" },
+	{ name: "Neolight", image: "/fonts-guide/christmas/neolight.webp" },
+	{ name: "Snowkist", image: "/fonts-guide/christmas/snowkist.webp" },
+	{ name: "Santa Bloom", image: "/fonts-guide/christmas/santa-bloom.webp" },
+	{ name: "Merry Spruce", image: "/fonts-guide/christmas/merry-spruce.webp" },
+	{ name: "Holy Charm", image: "/fonts-guide/christmas/holy-charm.webp" },
+	{ name: "Merry Script", image: "/fonts-guide/christmas/merry-script.webp" },
+	{ name: "Snowy Wishes", image: "/fonts-guide/christmas/snowy-wishes.webp" },
+	{ name: "Jolly Bells", image: "/fonts-guide/christmas/jolly-bells.webp" },
+	{ name: "Frost Magic", image: "/fonts-guide/christmas/frost-magic.webp" },
+	{ name: "Cheer Noel", image: "/fonts-guide/christmas/cheer-noel.webp" },
+	{ name: "Candy Cheer", image: "/fonts-guide/christmas/candy-cheer.webp" },
+	{ name: "Angel Glow", image: "/fonts-guide/christmas/angel-glow.webp" },
+];

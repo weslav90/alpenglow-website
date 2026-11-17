@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Illustration of a Christmas stocking with an embroidered name on the cuff">
+  <!-- Placeholder illustration. Replace with a photo of a finished stocking when one is available. -->
+  <rect width="800" height="600" fill="#F1DFD9"/>
+  <g fill="#FFF8F0" opacity="0.9">
+    <circle cx="110" cy="90" r="7"/><circle cx="230" cy="190" r="5"/><circle cx="90" cy="330" r="6"/>
+    <circle cx="190" cy="470" r="7"/><circle cx="640" cy="80" r="6"/><circle cx="720" cy="220" r="7"/>
+    <circle cx="610" cy="330" r="5"/><circle cx="700" cy="450" r="6"/><circle cx="560" cy="530" r="7"/>
+    <circle cx="300" cy="60" r="5"/><circle cx="500" cy="120" r="5"/><circle cx="130" cy="550" r="5"/>
+  </g>
+  <!-- hanging loop -->
+  <path d="M330 120 C300 60 370 50 362 118" fill="none" stroke="#A08CC6" stroke-width="12" stroke-linecap="round"/>
+  <!-- stocking body -->
+  <path d="M322 200 L322 360 C322 392 304 408 276 424 C226 452 214 512 262 532 C296 546 352 540 420 508 C466 486 482 452 482 410 L482 200 Z" fill="#D9768F"/>
+  <!-- heel and toe patches -->
+  <path d="M262 532 C214 512 226 452 276 424 C282 462 300 492 330 508 C310 532 284 541 262 532 Z" fill="#E7CA90"/>
+  <path d="M482 410 C482 452 466 486 420 508 C440 470 446 436 440 400 Z" fill="#E7CA90"/>
+  <!-- cuff -->
+  <rect x="302" y="112" width="200" height="100" rx="22" fill="#FFF8F0" stroke="#EBE0CA" stroke-width="4"/>
+  <path d="M318 196 H486" stroke="#E995AF" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round"/>
+  <text x="402" y="176" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="44" fill="#B8405F">Noelle</text>
+</svg>

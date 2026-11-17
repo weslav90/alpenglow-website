@@ -28,8 +28,25 @@ const MAX_QUANTITY_PER_ITEM = 20;
 // re-deriving the amount ourselves instead of trusting the Price object).
 // So personalization notes are collected per line but sent up to Stripe as
 // one combined string on the session/PaymentIntent instead of per-item.
-const NOTE_MAX_LENGTH = 200;
-const DESCRIPTION_MAX_LENGTH = 500;
+//
+// NOTE_MAX_LENGTH is per cart line and has to fit the longest note a product card can produce
+// (the Christmas stockings: font + thread color + a 250-character notes box).
+// DESCRIPTION_MAX_LENGTH is Stripe's limit on a PaymentIntent description; METADATA_VALUE_MAX
+// is Stripe's limit on a single metadata value, so a long combined note is split across
+// `personalization`, `personalization_2`, ... rather than cut off at 500 characters.
+const NOTE_MAX_LENGTH = 400;
+const DESCRIPTION_MAX_LENGTH = 1000;
+const METADATA_VALUE_MAX = 500;
+const METADATA_MAX_CHUNKS = 8;
+
+function personalizationMetadata(text: string): Record<string, string> {
+	const metadata: Record<string, string> = {};
+	for (let i = 0; i < METADATA_MAX_CHUNKS && i * METADATA_VALUE_MAX < text.length; i++) {
+		const key = i === 0 ? 'personalization' : `personalization_${i + 1}`;
+		metadata[key] = text.slice(i * METADATA_VALUE_MAX, (i + 1) * METADATA_VALUE_MAX);
+	}
+	return metadata;
+}
 
 interface CartLineInput {
 	priceId?: unknown;
@@ -102,7 +119,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			orderNotes.push(`${productLabelForPriceId(item.priceId)}: ${note}`);
 		}
 	}
-	const personalization = orderNotes.length > 0 ? orderNotes.join(' | ').slice(0, DESCRIPTION_MAX_LENGTH) : undefined;
+	const personalization = orderNotes.length > 0 ? orderNotes.join(' | ') : undefined;
 
 	const stripe = new Stripe(secretKey, {
 		// stripe-node defaults to Node's `https` module for requests, which
@@ -125,8 +142,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			// payment in the Stripe Dashboard (and in the "successful payment" notification, if
 			// that's mapped in) instead of the order having no record of what to embroider.
 			...(personalization && {
-				payment_intent_data: { description: personalization },
-				metadata: { personalization },
+				payment_intent_data: { description: personalization.slice(0, DESCRIPTION_MAX_LENGTH) },
+				metadata: personalizationMetadata(personalization),
 			}),
 		});
 
