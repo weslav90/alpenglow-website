@@ -20,6 +20,7 @@
 // file, so a product added here without a real Stripe Price ID will fail at
 // checkout, not at build time.
 
+import { CHRISTMAS_FONTS } from "./fonts";
 import { THREAD_COLORS } from "./threadColors";
 
 // Name Tag border colors are a subset of the same thread color chart used for custom orders
@@ -31,6 +32,20 @@ const nameTagBorderOptions = NAME_TAG_BORDER_CODES.map((code) => {
 	if (!color) throw new Error(`Thread color code ${code} not found in THREAD_COLORS`);
 	return { label: `${color.code} — ${color.name}`, value: `${color.code} ${color.name}`, hex: color.hex };
 });
+
+// The full thread color chart as personalization options — the same list, labels, and swatches
+// as the Thread Color dropdown on the custom order forms (FontThreadFields.astro).
+const threadColorOptions = THREAD_COLORS.map((color) => ({
+	label: `${color.code} — ${color.name}`,
+	value: `${color.code} ${color.name}`,
+	hex: color.hex,
+}));
+
+const christmasFontOptions = CHRISTMAS_FONTS.map((font) => ({
+	label: font.name,
+	value: font.name,
+	image: font.image,
+}));
 
 export interface ProductVariant {
 	/** Shown in the option picker, e.g. "Name Only – Small". */
@@ -45,13 +60,23 @@ export interface PersonalizationField {
 	/** Used as the note's label, e.g. "Name" produces "Name: Emma" in the order note. */
 	key: string;
 	label: string;
-	type: "text" | "select";
+	/** "textarea" is a multi-line free-text box, for notes longer than a single name. */
+	type: "text" | "select" | "textarea";
 	/**
 	 * Required when type is "select". `hex`, if set on every option, renders a small color
 	 * swatch next to the dropdown that updates as the customer picks an option (see the
-	 * thread-color picker in FontThreadFields.astro, which this mirrors).
+	 * thread-color picker in FontThreadFields.astro, which this mirrors). `image`, if set on
+	 * any option, renders a sample image under the dropdown the same way (used for fonts).
 	 */
-	options?: { label: string; value: string; hex?: string }[];
+	options?: { label: string; value: string; hex?: string; image?: string }[];
+	/** Placeholder text for "text" and "textarea" fields. Defaults to the label. */
+	placeholder?: string;
+	/**
+	 * Character limit for "text" and "textarea" fields. Defaults to 60. Keep the whole note for
+	 * one cart line under NOTE_MAX_LENGTH in src/pages/api/create-checkout-session.ts, or the
+	 * end of it is cut off before it reaches Stripe.
+	 */
+	maxLength?: number;
 	/**
 	 * Only required (and shown) when the currently selected variant's Price ID is in this list —
 	 * e.g. the phone number field on Name Tags only applies to the "Name & Phone Number" variant.
@@ -88,9 +113,41 @@ export interface Product {
 	customOrderHref?: string;
 	/** Overrides the call-to-action label. Defaults per product kind. */
 	ctaLabel?: string;
+	/**
+	 * Set to show a buy-it-now product in its own seasonal block at the top of the Shop page
+	 * instead of the general "Ready to order" grid.
+	 */
+	section?: "christmas";
 }
 
 export const products: Product[] = [
+	{
+		name: "Custom Embroidered Christmas Stockings",
+		price: "$10–$16",
+		description:
+			"Bring us your stockings and we'll embroider a name on each one. Pick a Christmas font and a thread color, then tell us the names and anything else you'd like. Price covers embroidery only — stockings are not included.",
+		// Placeholder illustration — swap for a photo of a finished stocking when one exists.
+		image: "/christmas-stocking.svg",
+		section: "christmas",
+		variants: [
+			// TODO: replace both placeholder IDs with the real Stripe Price IDs for the
+			// "Custom Embroidered Christmas Stockings" product ($10 and $16, one-time).
+			// Checkout rejects these placeholders until then.
+			{ label: "Set of 2", price: "$10", priceId: "price_REPLACE_STOCKINGS_SET_OF_2" },
+			{ label: "Set of 4", price: "$16", priceId: "price_REPLACE_STOCKINGS_SET_OF_4" },
+		],
+		personalization: [
+			{ key: "font", label: "Font Style", type: "select", options: christmasFontOptions },
+			{ key: "thread_color", label: "Thread Color", type: "select", options: threadColorOptions },
+			{
+				key: "notes",
+				label: "Names & Notes",
+				type: "textarea",
+				placeholder: "The name for each stocking, plus anything else we should know.",
+				maxLength: 250,
+			},
+		],
+	},
 	{
 		name: "Eagles Embroidered Baseball Cap",
 		price: "$35",
