@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StitchDivider from '../components/StitchDivider.astro';
 import PickupNotice from '../components/PickupNotice.astro';
+import { STOCKING_DROPOFF_DEADLINE, STOCKING_TURNAROUND, STOCKING_HANDOFF_AREA } from '../consts';
 import { SITE_TITLE } from '../consts';
 import { products } from '../data/products';
 
@@ -60,6 +61,11 @@ function slugify(name: string): string {
             <p class="lede">
               Custom name embroidery on your own stockings, in a font made for the season.
             </p>
+            <ul class="stocking-details" aria-label="Stocking drop-off details">
+              <li><strong>Last day to drop off:</strong> {STOCKING_DROPOFF_DEADLINE}</li>
+              <li><strong>Turnaround:</strong> {STOCKING_TURNAROUND} after drop-off</li>
+              <li><strong>Drop-off &amp; pickup:</strong> {STOCKING_HANDOFF_AREA} &mdash; we'll email you after you order to set a time</li>
+            </ul>
           </div>
         )}
         <div class="grid">
@@ -472,6 +478,17 @@ function slugify(name: string): string {
         color: var(--peak);
         max-width: 600px;
         margin: 0 auto;
+      }
+      .stocking-details {
+        list-style: none;
+        padding: 0.9rem 1.2rem;
+        margin: 1.25rem auto 0;
+        max-width: 600px;
+        text-align: left;
+        background: var(--cream, #FFF8F0);
+        border: 1px dashed var(--gold, #E7CA90);
+        border-radius: 10px;
+        line-height: 1.6;
       }
       /* A single card shouldn't stretch across the whole row. */
       .christmas-section .grid {

@@ -125,7 +125,7 @@ export const products: Product[] = [
 		name: "Custom Embroidered Christmas Stockings",
 		price: "$10–$16",
 		description:
-			"Bring us your stockings and we'll embroider a name on each one. Pick a Christmas font and a thread color, then tell us the names and anything else you'd like. Price covers embroidery only — stockings are not included.",
+			"Bring us your stockings and we'll embroider a name on each one. Pick a Christmas font and a thread color, then tell us the names and anything else you'd like. Price covers embroidery only — stockings are not included. Drop off by December 18, 2026; ready 3–5 days after drop-off.",
 		// Placeholder illustration — swap for a photo of a finished stocking when one exists.
 		image: "/christmas-stocking.svg",
 		section: "christmas",
