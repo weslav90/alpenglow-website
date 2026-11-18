@@ -1,0 +1,61 @@
+---
+// A callout card stating that orders are local pickup only. Used on the Shop, Cart, and
+// Custom Order pages so a customer sees it before they pay or request a quote.
+import { PICKUP_CITY } from '../consts';
+
+interface Props {
+	/** Optional extra sentence under the main line (e.g. what happens after checkout). */
+	detail?: string;
+}
+
+const { detail } = Astro.props;
+---
+
+<aside class="pickup-notice" aria-label="Pickup information">
+	<svg class="pin" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+		<path
+			fill="currentColor"
+			d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"
+		></path>
+	</svg>
+	<div>
+		<p class="headline">Local pickup only &middot; {PICKUP_CITY}</p>
+		<p class="body">
+			We don't ship. Every order is picked up in Colorado Springs — we'll email you when it's
+			ready to arrange a time.
+			{detail && <> {detail}</>}
+		</p>
+	</div>
+</aside>
+
+<style>
+	.pickup-notice {
+		display: flex;
+		gap: 0.75rem;
+		align-items: flex-start;
+		max-width: 700px;
+		margin: 1.25rem 0;
+		padding: 0.9rem 1.1rem;
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-left: 4px solid var(--rose);
+		border-radius: 10px;
+		box-shadow: var(--shadow-card);
+		text-align: left;
+	}
+	.pin {
+		flex-shrink: 0;
+		color: var(--rose);
+		margin-top: 0.15rem;
+	}
+	.headline {
+		margin: 0;
+		font-weight: 700;
+		color: var(--ink);
+	}
+	.body {
+		margin: 0.15rem 0 0 0;
+		font-size: 0.9rem;
+		color: var(--peak);
+	}
+</style>

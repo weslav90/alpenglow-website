@@ -4,7 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StitchDivider from '../components/StitchDivider.astro';
 import FontThreadFields from '../components/FontThreadFields.astro';
-import { SITE_TITLE } from '../consts';
+import { SITE_TITLE, PICKUP_CITY } from '../consts';
 
 const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf-9714-a9957d73f0a4";
 ---
@@ -40,6 +40,11 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
           <div class="info-item">
             <strong>Turnaround Time:</strong>
             <p>1–2 Business Days for Quotes</p>
+          </div>
+
+          <div class="info-item">
+            <strong>Pickup:</strong>
+            <p>Local pickup only in {PICKUP_CITY}. We don't ship.</p>
           </div>
 
           <div class="info-notice">

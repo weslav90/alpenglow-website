@@ -3,7 +3,8 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StitchDivider from '../components/StitchDivider.astro';
-import { SITE_TITLE } from '../consts';
+import PickupNotice from '../components/PickupNotice.astro';
+import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
 ---
 
 <!doctype html>
@@ -37,11 +38,21 @@ import { SITE_TITLE } from '../consts';
             <span class="subtotal-label">Subtotal</span>
             <span id="cart-subtotal" class="subtotal-value">$0.00</span>
           </div>
-          <p class="tax-note">Tax and shipping, if any, are calculated by Stripe at checkout.</p>
+          <p class="tax-note">
+            Colorado Springs sales tax ({SALES_TAX_DISPLAY}) is added at checkout. No shipping
+            charges — all orders are local pickup.
+          </p>
+
+          <PickupNotice />
+
+          <label class="pickup-ack">
+            <input type="checkbox" id="pickup-ack" />
+            <span>I understand this order is <strong>local pickup only</strong> in {PICKUP_CITY}.</span>
+          </label>
 
           <div id="cart-error" class="result-message error" hidden></div>
 
-          <button type="button" id="checkout-btn" class="btn btn-primary checkout-btn">
+          <button type="button" id="checkout-btn" class="btn btn-primary checkout-btn" disabled>
             Checkout with Stripe
           </button>
         </div>
@@ -58,6 +69,15 @@ import { SITE_TITLE } from '../consts';
       const subtotalEl = document.getElementById('cart-subtotal') as HTMLElement;
       const errorEl = document.getElementById('cart-error') as HTMLElement;
       const checkoutBtn = document.getElementById('checkout-btn') as HTMLButtonElement;
+      const pickupAck = document.getElementById('pickup-ack') as HTMLInputElement;
+
+      // Checkout stays disabled until the customer confirms they'll pick the order up locally,
+      // so nobody pays expecting it to be mailed. The server checks this flag too.
+      function syncCheckoutEnabled() {
+        checkoutBtn.disabled = !pickupAck.checked;
+      }
+      pickupAck.addEventListener('change', syncCheckoutEnabled);
+      syncCheckoutEnabled();
 
       function renderItem(item: CartItem): HTMLLIElement {
         const key = lineKey(item);
@@ -148,7 +168,7 @@ import { SITE_TITLE } from '../consts';
 
       checkoutBtn.addEventListener('click', async () => {
         const items = getCart();
-        if (items.length === 0) return;
+        if (items.length === 0 || !pickupAck.checked) return;
 
         errorEl.hidden = true;
         checkoutBtn.disabled = true;
@@ -159,6 +179,7 @@ import { SITE_TITLE } from '../consts';
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              pickupAcknowledged: pickupAck.checked,
               items: items.map((item) => ({
                 priceId: item.priceId,
                 quantity: item.quantity,
@@ -180,8 +201,8 @@ import { SITE_TITLE } from '../consts';
           errorEl.hidden = false;
           errorEl.textContent =
             error instanceof Error ? error.message : 'Could not start checkout. Please try again.';
-          checkoutBtn.disabled = false;
           checkoutBtn.textContent = 'Checkout with Stripe';
+          syncCheckoutEnabled();
         }
       });
     </script>
@@ -286,6 +307,25 @@ import { SITE_TITLE } from '../consts';
         font-size: 0.8rem;
         color: var(--peak);
         margin-top: 0.4rem;
+      }
+      .pickup-ack {
+        display: flex;
+        gap: 0.6rem;
+        align-items: flex-start;
+        max-width: 700px;
+        font-size: 0.95rem;
+        cursor: pointer;
+      }
+      .pickup-ack input {
+        width: 1.15rem;
+        height: 1.15rem;
+        margin-top: 0.25rem;
+        accent-color: var(--rose);
+        flex-shrink: 0;
+      }
+      .checkout-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
       .checkout-btn {
         margin-top: 1.5rem;

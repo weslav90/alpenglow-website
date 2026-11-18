@@ -10,4 +10,7 @@ declare namespace App {
 // here instead. This merges into the same global `Env` interface.
 interface Env {
   STRIPE_SECRET_KEY: string;
+  // Comma-separated manual Stripe Tax Rate IDs (txr_...) applied to every checkout line item.
+  // Declared under "vars" in wrangler.json; overridden locally by .dev.vars with test-mode IDs.
+  STRIPE_TAX_RATE_IDS: string;
 }

@@ -7,6 +7,9 @@
 		"directory": "./dist",
 		"binding": "ASSETS"
 	},
+	"vars": {
+		"STRIPE_TAX_RATE_IDS": "txr_1Ud0R9PwLggDTH96kBeqbAsr,txr_1Ud0S6PwLggDTH96vtRm58Xi,txr_1Ud0SaPwLggDTH96z5iRCd3Z,txr_1Ud0T2PwLggDTH96zNFjJQI9"
+	},
 	"observability": {
 		"enabled": true
 	},

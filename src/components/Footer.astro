@@ -1,6 +1,6 @@
 ---
 import StitchDivider from './StitchDivider.astro';
-import { SITE_TITLE } from '../consts';
+import { SITE_TITLE, PICKUP_SHORT } from '../consts';
 const today = new Date();
 ---
 
@@ -16,6 +16,7 @@ const today = new Date();
 			<a href="/contact">Custom Order</a>
 			<a href="mailto:orders@alpenglowcrafts.com">orders@alpenglowcrafts.com</a>
 		</div>
+		<p class="pickup-line">{PICKUP_SHORT}</p>
 		<p class="copyright">&copy; {today.getFullYear()} {SITE_TITLE}. All rights reserved.</p>
 	</div>
 </footer>
@@ -51,6 +52,12 @@ const today = new Date();
 	}
 	.footer-links a:hover {
 		color: var(--rose);
+	}
+	.pickup-line {
+		margin: 0 0 0.5rem 0;
+		color: var(--ink);
+		font-size: 0.85rem;
+		font-weight: 600;
 	}
 	.copyright {
 		margin: 0;

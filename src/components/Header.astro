@@ -1,10 +1,19 @@
 ---
 import HeaderLink from './HeaderLink.astro';
 import StitchDivider from './StitchDivider.astro';
-import { SITE_TITLE } from '../consts';
+import { SITE_TITLE, PICKUP_CITY } from '../consts';
 ---
 
 <header>
+  <div class="pickup-bar" role="note">
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"
+      ></path>
+    </svg>
+    <span><strong>Local pickup only</strong> in {PICKUP_CITY} &middot; We don't ship</span>
+  </div>
   <nav>
     <a href="/" class="logotype">{SITE_TITLE.replace(' Crafting Company', '')}</a>
     <div class="internal-links">
@@ -41,7 +50,21 @@ import { SITE_TITLE } from '../consts';
 <style>
   header {
     background: var(--cream);
-    padding-top: 0.5em;
+  }
+  .pickup-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    padding: 0.45em 1em;
+    background: var(--ink);
+    color: var(--cream);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+  .pickup-bar svg {
+    flex-shrink: 0;
+    color: var(--gold);
   }
   nav {
     display: flex;
@@ -101,6 +124,9 @@ import { SITE_TITLE } from '../consts';
     text-align: center;
   }
   @media (max-width: 640px) {
+    .pickup-bar svg {
+      display: none;
+    }
     nav {
       justify-content: center;
       text-align: center;
