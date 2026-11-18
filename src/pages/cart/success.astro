@@ -2,7 +2,7 @@
 import BaseHead from '../../components/BaseHead.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import { SITE_TITLE } from '../../consts';
+import { SITE_TITLE, PICKUP_CITY } from '../../consts';
 ---
 
 <!doctype html>
@@ -19,6 +19,10 @@ import { SITE_TITLE } from '../../consts';
         <p class="lede">
           Stripe has processed your payment and a receipt is on its way to your email. We'll
           begin stitching your order shortly.
+        </p>
+        <p class="lede pickup">
+          <strong>Next step: pickup.</strong> Your order will be ready for local pickup in
+          {PICKUP_CITY}. We'll email you when it's finished to arrange a pickup time.
         </p>
         <a href="/shop" class="btn btn-primary">Continue Shopping</a>
       </section>
@@ -43,6 +47,9 @@ import { SITE_TITLE } from '../../consts';
       .confirmation .lede {
         color: var(--peak);
         margin-bottom: 2rem;
+      }
+      .confirmation .lede.pickup {
+        color: var(--ink);
       }
     </style>
   </body>

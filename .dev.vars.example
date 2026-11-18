@@ -7,3 +7,9 @@
 # In production (Cloudflare Workers), set the same variable with:
 #   npx wrangler secret put STRIPE_SECRET_KEY
 STRIPE_SECRET_KEY=sk_test_...
+
+# Manual Stripe Tax Rates (Colorado Springs pickup) applied to every checkout line item,
+# comma-separated. Production IDs live in wrangler.json "vars"; locally, list the TEST-mode
+# Tax Rate IDs you created in the Stripe Dashboard (test mode -> Product catalog -> Tax rates):
+# state 2.90%, El Paso County 1.23%, PPRTA 1.00%, City of Colorado Springs 3.07%.
+STRIPE_TAX_RATE_IDS=txr_...,txr_...,txr_...,txr_...

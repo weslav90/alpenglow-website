@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { products } from '../../data/products';
+import { PICKUP_CITY } from '../../consts';
 
 // Runs on the Cloudflare Worker per-request rather than at build time —
 // required for any route that needs a runtime secret or talks to Stripe.
@@ -38,6 +39,26 @@ const NOTE_MAX_LENGTH = 400;
 const DESCRIPTION_MAX_LENGTH = 1000;
 const METADATA_VALUE_MAX = 500;
 const METADATA_MAX_CHUNKS = 8;
+
+// Sales tax: every order is picked up in Colorado Springs, so every sale is sourced there and
+// carries the same set of manual Stripe Tax Rates (state, El Paso County, PPRTA, and City of
+// Colorado Springs). Their IDs live in the STRIPE_TAX_RATE_IDS variable (wrangler.json for
+// production; .dev.vars locally, with test-mode IDs) as a comma-separated list. Keeping the
+// rates separate rather than one combined 8.20% rate means Stripe's tax report splits the
+// collected tax the same way the two returns do: state, county and PPRTA go on the Colorado
+// DOR return; the city rate goes on the City of Colorado Springs return.
+const TAX_RATE_ID_PATTERN = /^txr_[A-Za-z0-9]+$/;
+
+function parseTaxRateIds(raw: string | undefined): string[] | null {
+	const ids = (raw ?? '')
+		.split(',')
+		.map((id) => id.trim())
+		.filter(Boolean);
+	if (ids.length === 0 || !ids.every((id) => TAX_RATE_ID_PATTERN.test(id))) return null;
+	return ids;
+}
+
+const PICKUP_MESSAGE = `This order is for local pickup in ${PICKUP_CITY}. We'll email you when it's ready to arrange a pickup time. Need it shipped instead? Don't pay here — request a shipping quote at alpenglowcrafts.com/contact.`;
 
 function personalizationMetadata(text: string): Record<string, string> {
 	const metadata: Record<string, string> = {};
@@ -90,11 +111,23 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		return jsonResponse({ error: 'Checkout is not configured.' }, 500);
 	}
 
-	let body: { items?: CartLineInput[] };
+	// Fail closed: selling without the tax rates attached would under-collect sales tax that is
+	// still owed to the state and city, so checkout refuses to start instead.
+	const taxRateIds = parseTaxRateIds(locals.runtime.env.STRIPE_TAX_RATE_IDS);
+	if (!taxRateIds) {
+		console.error('STRIPE_TAX_RATE_IDS is missing or malformed for this environment');
+		return jsonResponse({ error: 'Checkout is not configured.' }, 500);
+	}
+
+	let body: { items?: CartLineInput[]; pickupAcknowledged?: unknown };
 	try {
 		body = await request.json();
 	} catch {
 		return jsonResponse({ error: 'Invalid request body.' }, 400);
+	}
+
+	if (body.pickupAcknowledged !== true) {
+		return jsonResponse({ error: `Please confirm you'll pick up this order in ${PICKUP_CITY}.` }, 400);
 	}
 
 	const rawItems = Array.isArray(body.items) ? body.items : [];
@@ -102,7 +135,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		return jsonResponse({ error: 'Cart is empty.' }, 400);
 	}
 
-	const lineItems: { price: string; quantity: number }[] = [];
+	const lineItems: { price: string; quantity: number; tax_rates: string[] }[] = [];
 	const orderNotes: string[] = [];
 	for (const item of rawItems) {
 		if (typeof item.priceId !== 'string' || !knownPriceIds.has(item.priceId)) {
@@ -112,7 +145,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		if (!Number.isFinite(quantity) || quantity < 1 || quantity > MAX_QUANTITY_PER_ITEM) {
 			return jsonResponse({ error: 'Invalid item quantity.' }, 400);
 		}
-		lineItems.push({ price: item.priceId, quantity });
+		lineItems.push({ price: item.priceId, quantity, tax_rates: taxRateIds });
 
 		const note = sanitizeNote(item.note);
 		if (note) {
@@ -137,13 +170,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			line_items: lineItems,
 			success_url: `${origin}/cart/success`,
 			cancel_url: `${origin}/cart`,
+			// Shown just above the Pay button on Stripe's page, so the pickup-only terms are the
+			// last thing the customer reads before paying. No shipping address is collected; shipped
+			// orders are quoted and invoiced by hand instead of going through this checkout.
+			custom_text: { submit: { message: PICKUP_MESSAGE } },
 			// Personalization notes aren't shown to the customer here — they typed them on the
 			// shop page already. This is purely so the order is fulfillable: it shows up on the
 			// payment in the Stripe Dashboard (and in the "successful payment" notification, if
 			// that's mapped in) instead of the order having no record of what to embroider.
+			metadata: {
+				fulfillment: 'local_pickup',
+				...(personalization && personalizationMetadata(personalization)),
+			},
 			...(personalization && {
 				payment_intent_data: { description: personalization.slice(0, DESCRIPTION_MAX_LENGTH) },
-				metadata: personalizationMetadata(personalization),
 			}),
 		});
 

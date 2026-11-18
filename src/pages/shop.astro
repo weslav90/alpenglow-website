@@ -3,6 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StitchDivider from '../components/StitchDivider.astro';
+import PickupNotice from '../components/PickupNotice.astro';
 import { SITE_TITLE } from '../consts';
 import { products } from '../data/products';
 
@@ -44,6 +45,7 @@ function slugify(name: string): string {
           your choice. Looking for something else entirely? Start a
           <a href="/contact">custom order</a>.
         </p>
+        <div class="pickup-wrap"><PickupNotice /></div>
       </section>
 
       <StitchDivider />
@@ -354,6 +356,10 @@ function slugify(name: string): string {
         color: var(--peak);
         max-width: 600px;
         margin: 0 auto;
+      }
+      .pickup-wrap {
+        display: flex;
+        justify-content: center;
       }
       .custom-section {
         text-align: center;

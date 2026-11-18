@@ -32,6 +32,23 @@ This requires a Stripe secret key at runtime:
 - Local development: copy `.dev.vars.example` to `.dev.vars` and fill in a test-mode secret key.
 - Production: `npx wrangler secret put STRIPE_SECRET_KEY`.
 
+### Local pickup & sales tax
+
+Listed prices and online checkout are for local pickup in Colorado Springs, CO; Checkout never
+collects a shipping address. Shipping is available only by custom quote (Custom Order form or
+email), invoiced by hand. The notice appears in the header bar, footer, Shop, Cart (with a
+required "I'll pick up this order" checkbox, also enforced by the checkout endpoint), Custom
+Order page, the Stripe Checkout page (above the Pay button), and the order confirmation page.
+Its wording lives in `src/consts.ts`.
+
+Because every online sale is picked up in Colorado Springs, every line item gets the same manual
+Stripe Tax Rates: State of Colorado 2.90%, El Paso County 1.23%, PPRTA 1.00% (all filed on the
+Colorado DOR return) and City of Colorado Springs 3.07% (filed with the city) — 8.20% combined.
+Their IDs are the comma-separated `STRIPE_TAX_RATE_IDS` variable in `wrangler.json`; locally,
+set test-mode IDs in `.dev.vars`. Checkout refuses to start if this variable is missing. If a
+rate changes, create a new Tax Rate in Stripe (rates can't be edited once used), swap its ID in
+`wrangler.json`, archive the old one, and update `SALES_TAX_DISPLAY` in `src/consts.ts`.
+
 Each buy-it-now entry in `src/data/products.ts` needs a real Stripe Price ID (`priceId`, from
 the Stripe Dashboard's Product catalog) — the checkout endpoint rejects any price ID it doesn't
 recognize from that file.
