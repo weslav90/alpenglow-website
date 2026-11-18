@@ -16,3 +16,9 @@ export const PICKUP_SHORT = `Prices are for local pickup in ${PICKUP_CITY}. Ship
 // STRIPE_TAX_RATE_IDS (wrangler.json). Keep this in sync if a rate changes:
 // state 2.90% + El Paso County 1.23% + PPRTA 1.00% + City of Colorado Springs 3.07% = 8.20%.
 export const SALES_TAX_DISPLAY = '8.20%';
+
+// Christmas stockings: customers drop off their own stockings and pick them up finished.
+// Shown in the Shop page's Christmas section and the stocking product card.
+export const STOCKING_DROPOFF_DEADLINE = 'December 18, 2026';
+export const STOCKING_TURNAROUND = '3–5 days';
+export const STOCKING_HANDOFF_AREA = 'near Powers & N. Carefree in Colorado Springs';
