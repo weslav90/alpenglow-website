@@ -34,13 +34,14 @@ This requires a Stripe secret key at runtime:
 
 ### Local pickup & sales tax
 
-The business is local pickup only in Colorado Springs, CO — nothing ships, and Checkout never
-collects a shipping address. The pickup notice appears in the header bar, footer, Shop, Cart
-(with a required "local pickup only" checkbox, also enforced by the checkout endpoint), Custom
+Listed prices and online checkout are for local pickup in Colorado Springs, CO; Checkout never
+collects a shipping address. Shipping is available only by custom quote (Custom Order form or
+email), invoiced by hand. The notice appears in the header bar, footer, Shop, Cart (with a
+required "I'll pick up this order" checkbox, also enforced by the checkout endpoint), Custom
 Order page, the Stripe Checkout page (above the Pay button), and the order confirmation page.
 Its wording lives in `src/consts.ts`.
 
-Because every sale is picked up in Colorado Springs, every line item gets the same manual
+Because every online sale is picked up in Colorado Springs, every line item gets the same manual
 Stripe Tax Rates: State of Colorado 2.90%, El Paso County 1.23%, PPRTA 1.00% (all filed on the
 Colorado DOR return) and City of Colorado Springs 3.07% (filed with the city) — 8.20% combined.
 Their IDs are the comma-separated `STRIPE_TAX_RATE_IDS` variable in `wrangler.json`; locally,

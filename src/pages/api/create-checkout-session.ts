@@ -58,7 +58,7 @@ function parseTaxRateIds(raw: string | undefined): string[] | null {
 	return ids;
 }
 
-const PICKUP_MESSAGE = `Local pickup only in ${PICKUP_CITY} — we don't ship. We'll email you when your order is ready to arrange a pickup time.`;
+const PICKUP_MESSAGE = `This order is for local pickup in ${PICKUP_CITY}. We'll email you when it's ready to arrange a pickup time. Need it shipped instead? Don't pay here — request a shipping quote at alpenglowcrafts.com/contact.`;
 
 function personalizationMetadata(text: string): Record<string, string> {
 	const metadata: Record<string, string> = {};
@@ -127,7 +127,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	if (body.pickupAcknowledged !== true) {
-		return jsonResponse({ error: `Please confirm this order is local pickup in ${PICKUP_CITY}.` }, 400);
+		return jsonResponse({ error: `Please confirm you'll pick up this order in ${PICKUP_CITY}.` }, 400);
 	}
 
 	const rawItems = Array.isArray(body.items) ? body.items : [];
@@ -171,7 +171,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			success_url: `${origin}/cart/success`,
 			cancel_url: `${origin}/cart`,
 			// Shown just above the Pay button on Stripe's page, so the pickup-only terms are the
-			// last thing the customer reads before paying. No shipping address is collected.
+			// last thing the customer reads before paying. No shipping address is collected; shipped
+			// orders are quoted and invoiced by hand instead of going through this checkout.
 			custom_text: { submit: { message: PICKUP_MESSAGE } },
 			// Personalization notes aren't shown to the customer here — they typed them on the
 			// shop page already. This is purely so the order is fulfillable: it shows up on the

@@ -1,7 +1,7 @@
 ---
-// A callout card stating that orders are local pickup only. Used on the Shop, Cart, and
+// A callout card stating that listed prices are for local pickup, with shipping by custom quote. Used on the Shop, Cart, and
 // Custom Order pages so a customer sees it before they pay or request a quote.
-import { PICKUP_CITY } from '../consts';
+import { PICKUP_CITY, SHIPPING_QUOTE_HREF } from '../consts';
 
 interface Props {
 	/** Optional extra sentence under the main line (e.g. what happens after checkout). */
@@ -19,10 +19,11 @@ const { detail } = Astro.props;
 		></path>
 	</svg>
 	<div>
-		<p class="headline">Local pickup only &middot; {PICKUP_CITY}</p>
+		<p class="headline">Local pickup &middot; {PICKUP_CITY}</p>
 		<p class="body">
-			We don't ship. Every order is picked up in Colorado Springs — we'll email you when it's
-			ready to arrange a time.
+			Listed prices are for pickup in Colorado Springs — we'll email you when your order is
+			ready to arrange a time. Need it shipped? Shipping is available by custom quote;
+			<a href={SHIPPING_QUOTE_HREF}>request one</a> before you order.
 			{detail && <> {detail}</>}
 		</p>
 	</div>
@@ -57,5 +58,9 @@ const { detail } = Astro.props;
 		margin: 0.15rem 0 0 0;
 		font-size: 0.9rem;
 		color: var(--peak);
+	}
+	.body a {
+		color: var(--rose);
+		font-weight: 600;
 	}
 </style>

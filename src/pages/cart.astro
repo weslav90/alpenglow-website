@@ -39,15 +39,15 @@ import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
             <span id="cart-subtotal" class="subtotal-value">$0.00</span>
           </div>
           <p class="tax-note">
-            Colorado Springs sales tax ({SALES_TAX_DISPLAY}) is added at checkout. No shipping
-            charges — all orders are local pickup.
+            Colorado Springs sales tax ({SALES_TAX_DISPLAY}) is added at checkout. Checkout is for
+            local pickup; shipped orders are quoted separately.
           </p>
 
           <PickupNotice />
 
           <label class="pickup-ack">
             <input type="checkbox" id="pickup-ack" />
-            <span>I understand this order is <strong>local pickup only</strong> in {PICKUP_CITY}.</span>
+            <span>I'll <strong>pick up this order</strong> in {PICKUP_CITY}.</span>
           </label>
 
           <div id="cart-error" class="result-message error" hidden></div>
@@ -72,7 +72,8 @@ import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
       const pickupAck = document.getElementById('pickup-ack') as HTMLInputElement;
 
       // Checkout stays disabled until the customer confirms they'll pick the order up locally,
-      // so nobody pays expecting it to be mailed. The server checks this flag too.
+      // so nobody pays a pickup price expecting it to be mailed (shipping is quoted separately).
+      // The server checks this flag too.
       function syncCheckoutEnabled() {
         checkoutBtn.disabled = !pickupAck.checked;
       }
@@ -228,7 +229,11 @@ import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
         gap: 1.25rem;
         max-width: 700px;
       }
-      .cart-item {
+      /* Cart rows are built in the browser by renderItem() below, so they never receive this
+         page's scoped-style attribute and plain selectors here wouldn't match them (that's why
+         the images rendered full-size and the buttons unstyled). Reaching them through the
+         .cart-list container, which is in the template, keeps these rules page-local. */
+      .cart-list :global(.cart-item) {
         display: flex;
         gap: 1rem;
         background: var(--card);
@@ -237,40 +242,40 @@ import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
         padding: 1rem;
         box-shadow: var(--shadow-card);
       }
-      .cart-item img {
+      .cart-list :global(.cart-item img) {
         width: 96px;
         height: 96px;
         object-fit: cover;
         border-radius: 8px;
         flex-shrink: 0;
       }
-      .cart-item-details {
+      .cart-list :global(.cart-item-details) {
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
         flex-grow: 1;
       }
-      .cart-item-details h3 {
+      .cart-list :global(.cart-item-details h3) {
         margin: 0;
         font-size: 1.05rem;
       }
-      .cart-item-price {
+      .cart-list :global(.cart-item-price) {
         margin: 0;
         color: var(--rose);
         font-weight: 600;
       }
-      .cart-item-note {
+      .cart-list :global(.cart-item-note) {
         margin: 0;
         color: var(--peak);
         font-size: 0.85rem;
       }
-      .cart-item-controls {
+      .cart-list :global(.cart-item-controls) {
         display: flex;
         align-items: center;
         gap: 0.6rem;
         margin-top: auto;
       }
-      .qty-btn {
+      .cart-list :global(.qty-btn) {
         width: 2em;
         height: 2em;
         border-radius: 50%;
@@ -279,12 +284,12 @@ import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
         cursor: pointer;
         font-size: 1rem;
       }
-      .qty-value {
+      .cart-list :global(.qty-value) {
         min-width: 1.5em;
         text-align: center;
         font-weight: 600;
       }
-      .remove-btn {
+      .cart-list :global(.remove-btn) {
         margin-left: 0.75rem;
         border: none;
         background: none;

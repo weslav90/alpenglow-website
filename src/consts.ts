@@ -4,11 +4,13 @@
 export const SITE_TITLE = 'Alpenglow Crafting Company';
 export const SITE_DESCRIPTION = 'Custom embroidery inspired by the radiant warmth of mountain alpenglow.';
 
-// Every order — buy-it-now or custom — is picked up locally. Nothing ships. These strings are
-// shared by the header bar, footer, shop, cart, contact, and order-confirmation pages and the
-// Stripe Checkout page, so the wording stays identical everywhere it appears.
+// Listed prices are for local pickup. Shipping isn't offered at checkout, but can be arranged
+// by custom quote through the Custom Order form or email. These strings are shared by the
+// header bar, footer, shop, cart, contact, and order-confirmation pages and the Stripe Checkout
+// page, so the wording stays identical everywhere it appears.
 export const PICKUP_CITY = 'Colorado Springs, CO';
-export const PICKUP_SHORT = `Local pickup only in ${PICKUP_CITY} — we don't ship.`;
+export const SHIPPING_QUOTE_HREF = '/contact';
+export const PICKUP_SHORT = `Prices are for local pickup in ${PICKUP_CITY}. Shipping available by custom quote.`;
 
 // Display-only. The amount actually charged comes from the manual Stripe Tax Rates listed in
 // STRIPE_TAX_RATE_IDS (wrangler.json). Keep this in sync if a rate changes:
