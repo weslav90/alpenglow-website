@@ -119,7 +119,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		return jsonResponse({ error: 'Checkout is not configured.' }, 500);
 	}
 
-	let body: { items?: CartLineInput[]; pickupAcknowledged?: unknown };
+	let body: { items?: CartLineInput[]; pickupAcknowledged?: unknown; marketingOptIn?: unknown };
 	try {
 		body = await request.json();
 	} catch {
@@ -129,6 +129,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	if (body.pickupAcknowledged !== true) {
 		return jsonResponse({ error: `Please confirm you'll pick up this order in ${PICKUP_CITY}.` }, 400);
 	}
+
+	// Optional marketing-email consent from the cart page's unchecked-by-default checkbox. Only an
+	// explicit true counts as yes, so a missing or malformed value never adds someone to the list.
+	const marketingOptIn = body.marketingOptIn === true ? 'yes' : 'no';
 
 	const rawItems = Array.isArray(body.items) ? body.items : [];
 	if (rawItems.length === 0) {
@@ -180,11 +184,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
 			// that's mapped in) instead of the order having no record of what to embroider.
 			metadata: {
 				fulfillment: 'local_pickup',
+				marketing_opt_in: marketingOptIn,
 				...(personalization && personalizationMetadata(personalization)),
 			},
-			...(personalization && {
-				payment_intent_data: { description: personalization.slice(0, DESCRIPTION_MAX_LENGTH) },
-			}),
+			// The consent answer is copied onto the payment too, so it sits next to the customer's
+			// email on the payment record, not only on the Checkout Session.
+			payment_intent_data: {
+				metadata: { marketing_opt_in: marketingOptIn },
+				...(personalization && { description: personalization.slice(0, DESCRIPTION_MAX_LENGTH) }),
+			},
 		});
 
 		if (!session.url) {

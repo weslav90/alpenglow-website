@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import StitchDivider from '../components/StitchDivider.astro';
 import PickupNotice from '../components/PickupNotice.astro';
+import MarketingOptIn from '../components/MarketingOptIn.astro';
 import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
 ---
 
@@ -50,6 +51,10 @@ import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
             <span>I'll <strong>pick up this order</strong> in {PICKUP_CITY}.</span>
           </label>
 
+          <div class="cart-opt-in">
+            <MarketingOptIn id="marketing-opt-in" />
+          </div>
+
           <div id="cart-error" class="result-message error" hidden></div>
 
           <button type="button" id="checkout-btn" class="btn btn-primary checkout-btn" disabled>
@@ -70,6 +75,7 @@ import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
       const errorEl = document.getElementById('cart-error') as HTMLElement;
       const checkoutBtn = document.getElementById('checkout-btn') as HTMLButtonElement;
       const pickupAck = document.getElementById('pickup-ack') as HTMLInputElement;
+      const marketingOptIn = document.getElementById('marketing-opt-in') as HTMLInputElement;
 
       // Checkout stays disabled until the customer confirms they'll pick the order up locally,
       // so nobody pays a pickup price expecting it to be mailed (shipping is quoted separately).
@@ -181,6 +187,8 @@ import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               pickupAcknowledged: pickupAck.checked,
+              // Optional and unchecked by default; it never blocks checkout.
+              marketingOptIn: marketingOptIn.checked,
               items: items.map((item) => ({
                 priceId: item.priceId,
                 quantity: item.quantity,
@@ -327,6 +335,9 @@ import { SITE_TITLE, PICKUP_CITY, SALES_TAX_DISPLAY } from '../consts';
         margin-top: 0.25rem;
         accent-color: var(--rose);
         flex-shrink: 0;
+      }
+      .cart-opt-in {
+        margin-top: 0.85rem;
       }
       .checkout-btn:disabled {
         opacity: 0.5;
