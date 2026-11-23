@@ -118,6 +118,15 @@ export interface Product {
 	 * instead of the general "Ready to order" grid.
 	 */
 	section?: "christmas";
+	/**
+	 * Offer this buy-it-now product as a cross-sell alongside a seasonal section's products: a
+	 * callout under that section on the Shop page, and a suggestion on the Cart page while the
+	 * cart holds one of that section's products. The product itself still lives in the general
+	 * "Ready to order" grid (one card, so the Add to Cart form isn't duplicated).
+	 */
+	crossSellWith?: "christmas";
+	/** Short pitch shown in the cross-sell callout. */
+	crossSellPitch?: string;
 }
 
 export const products: Product[] = [
@@ -216,6 +225,39 @@ export const products: Product[] = [
 		image: "/girls-bow.jpg",
 		priceId: "price_1UGHbGPwLggDTH96gOtG5K9b",
 		personalization: [{ key: "name", label: "Name to Embroider", type: "text" }],
+	},
+	{
+		name: "Custom Beanie",
+		price: "$20",
+		description:
+			"Custom embroidery on a beanie, like the mountain-and-pines design pictured. $20 covers the embroidery — bring your own beanie, or choose to have us include one for an additional cost (we'll email you the price and invoice it separately).",
+		image: "/custom-beanie.jpg",
+		// Stripe product "Custom Beanie" (prod_Vg9q7BzlKoWz3L). $20 = embroidery only.
+		priceId: "price_1UenWcPwLggDTH96uozgxxRK",
+		crossSellWith: "christmas",
+		crossSellPitch:
+			"A stocking stuffer that gets worn all winter. Bring your own beanie or we can include one, and we'll stitch your design on it.",
+		personalization: [
+			{
+				key: "beanie",
+				label: "Beanie",
+				type: "select",
+				options: [
+					{ label: "I'll bring my own beanie", value: "Customer provides beanie" },
+					{
+						label: "Please include a beanie (additional cost)",
+						value: "Include a beanie (additional cost, to be invoiced)",
+					},
+				],
+			},
+			{
+				key: "design",
+				label: "Design or Text to Embroider",
+				type: "textarea",
+				placeholder: "Words, a name, or a description of the design you'd like. Include beanie color if we're supplying it.",
+				maxLength: 250,
+			},
+		],
 	},
 	{
 		name: "Custom Embroidered Baseball Cap",
