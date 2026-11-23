@@ -19,6 +19,8 @@ const buyItNowGroups = [
   { id: 'ready-to-order', products: readyToOrder },
 ].filter((group) => group.products.length > 0);
 const customEmbroidery = products.filter((product) => product.customOrderHref);
+// Products pitched as an add-on under the Christmas stockings.
+const christmasCrossSells = buyItNow.filter((product) => product.crossSellWith === 'christmas');
 
 // Unique per-product id prefix for personalization field <label for>/id pairs, since several
 // product cards with their own fields render on this one page.
@@ -70,7 +72,7 @@ function slugify(name: string): string {
         )}
         <div class="grid">
           {group.products.map((product) => (
-            <div class="product">
+            <div class="product" id={slugify(product.name)}>
               <img src={product.image} alt={product.name} />
               <div class="product-body">
                 <h3>{product.name}</h3>
@@ -161,6 +163,17 @@ function slugify(name: string): string {
             </div>
           ))}
         </div>
+        {group.id === 'christmas' && christmasCrossSells.map((item) => (
+          <a class="cross-sell" href={`#${slugify(item.name)}`}>
+            <img src={item.image} alt="" loading="lazy" />
+            <span class="cross-sell-text">
+              <span class="cross-sell-eyebrow">Pairs well with stockings</span>
+              <strong>{item.name} &mdash; {item.price}</strong>
+              <span>{item.crossSellPitch ?? item.description}</span>
+            </span>
+            <span class="cross-sell-cta">See the beanie &rarr;</span>
+          </a>
+        ))}
       </section>
 
       <StitchDivider />
@@ -494,6 +507,65 @@ function slugify(name: string): string {
       .christmas-section .grid {
         grid-template-columns: repeat(auto-fit, minmax(280px, 420px));
         justify-content: center;
+      }
+      .cross-sell {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        max-width: 640px;
+        margin: 2rem auto 0;
+        padding: 1rem 1.25rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--shadow-card);
+        text-decoration: none;
+        color: inherit;
+      }
+      .cross-sell:hover {
+        border-color: var(--rose);
+      }
+      .cross-sell img {
+        width: 96px;
+        height: 96px;
+        flex-shrink: 0;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+      .cross-sell-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        font-size: 0.9rem;
+        color: var(--peak);
+        text-align: left;
+      }
+      .cross-sell-text strong {
+        font-family: "Fraunces", serif;
+        font-size: 1.1rem;
+        color: var(--ink);
+      }
+      .cross-sell-eyebrow {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--rose);
+      }
+      .cross-sell-cta {
+        flex-shrink: 0;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--rose);
+        white-space: nowrap;
+      }
+      @media (max-width: 560px) {
+        .cross-sell {
+          flex-wrap: wrap;
+        }
+        .cross-sell-text {
+          flex: 1 1 60%;
+        }
       }
       .personalize-field input:focus,
       .personalize-field textarea:focus,
