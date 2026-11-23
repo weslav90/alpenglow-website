@@ -1,0 +1,45 @@
+---
+// Optional consent to marketing emails. Unchecked by default and never required, so nobody is
+// added to the email list unless they tick it themselves. Used on every form that collects an
+// email: the custom-order forms (submitted to Web3Forms as marketing_opt_in) and the cart (sent
+// to the checkout endpoint, which records it on the Stripe Checkout Session and payment).
+import { MARKETING_OPT_IN_LABEL } from '../consts';
+
+interface Props {
+	id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<div class="marketing-opt-in">
+	<input type="checkbox" id={id} name="marketing_opt_in" value="Yes" />
+	<label for={id}>{MARKETING_OPT_IN_LABEL}</label>
+</div>
+
+<style>
+	.marketing-opt-in {
+		display: flex;
+		gap: 0.6rem;
+		align-items: flex-start;
+		max-width: 700px;
+		margin: 0 0 1.25rem 0;
+		font-size: 0.9rem;
+		color: var(--peak);
+	}
+	.marketing-opt-in input {
+		width: 1.15rem;
+		height: 1.15rem;
+		margin: 0.2rem 0 0 0;
+		accent-color: var(--rose);
+		flex-shrink: 0;
+		cursor: pointer;
+	}
+	.marketing-opt-in input:focus-visible {
+		outline: 2px solid var(--violet);
+		outline-offset: 2px;
+	}
+	.marketing-opt-in label {
+		cursor: pointer;
+	}
+</style>

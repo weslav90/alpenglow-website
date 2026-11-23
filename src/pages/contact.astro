@@ -2,6 +2,7 @@
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import MarketingOptIn from '../components/MarketingOptIn.astro';
 import StitchDivider from '../components/StitchDivider.astro';
 import FontThreadFields from '../components/FontThreadFields.astro';
 import { SITE_TITLE, PICKUP_CITY } from '../consts';
@@ -93,6 +94,8 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
               <textarea id="message" name="message" rows="5" required placeholder="Describe what you'd like created..."></textarea>
             </div>
 
+            <MarketingOptIn id="contact-marketing-opt-in" />
+
             <button type="submit" id="submit-btn" class="btn btn-primary submit-btn">Send Order Request</button>
             <div id="result" class="result-message"></div>
           </form>
@@ -116,6 +119,9 @@ const web3formsKey = import.meta.env.PUBLIC_WEB3FORMS_KEY || "1936cfc5-4f93-4fcf
           result.innerText = "Submitting your request...";
 
           const formData = new FormData(form);
+          // Unticked checkboxes are left out of FormData entirely. Record an explicit "No" so
+          // every order email states whether the customer agreed to marketing emails.
+          formData.set('marketing_opt_in', formData.has('marketing_opt_in') ? 'Yes' : 'No');
 
           // See custom-hat.astro — the subject carries the order summary so a
           // Trello card title can map straight from it instead of parsing the

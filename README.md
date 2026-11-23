@@ -21,6 +21,19 @@ The website for **Alpenglow Crafting Company** — custom embroidery, built with
 
 The contact/custom-order form submits via [Web3Forms](https://web3forms.com).
 
+### Marketing email consent
+
+Every form that collects an email (the Custom Order form, each custom-product quote form, and
+the cart) shows an optional "send me occasional emails" checkbox, unchecked by default
+(`src/components/MarketingOptIn.astro`; wording in `MARKETING_OPT_IN_LABEL` in `src/consts.ts`).
+It never blocks an order. The answer is recorded as:
+
+- `marketing_opt_in: Yes` or `No` in each Web3Forms order email.
+- `marketing_opt_in: yes` or `no` metadata on the Stripe Checkout Session and on its payment.
+
+Only customers marked yes should receive marketing emails. Orders placed before this checkbox
+existed have no answer recorded and count as no.
+
 ## 🛒 Shopping cart & checkout
 
 Customers add one or more ready-made products to a cart (stored in the browser's localStorage)
