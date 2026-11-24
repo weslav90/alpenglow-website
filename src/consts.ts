@@ -10,6 +10,10 @@ export const SITE_DESCRIPTION = 'Custom embroidery inspired by the radiant warmt
 // page, so the wording stays identical everywhere it appears.
 export const PICKUP_CITY = 'Colorado Springs, CO';
 export const SHIPPING_QUOTE_HREF = '/contact';
+// Social profiles, linked from the footer. Both handles are alpenglowcrafts.
+export const INSTAGRAM_URL = 'https://www.instagram.com/alpenglowcrafts/';
+export const FACEBOOK_URL = 'https://www.facebook.com/alpenglowcrafts';
+
 export const PICKUP_SHORT = `Prices are for local pickup in ${PICKUP_CITY}. Shipping available by custom quote.`;
 
 // Display-only. The amount actually charged comes from the manual Stripe Tax Rates listed in
